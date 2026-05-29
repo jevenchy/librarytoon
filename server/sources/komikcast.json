@@ -1,0 +1,16 @@
+{
+  "id": "komikcast",
+  "baseUrl": "https://komikcast.site",
+  "method": "api",
+  "urlFormat": "slug",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "https://be.komikcast.cc",
+  "language": "id",
+  "contentRating": "sfw",
+  "color": "#0ea5e9",
+  "searchParam": "title",
+  "proxyImages": true,
+  "apiEnvelope": "retcode",
+  "enabled": true
+}

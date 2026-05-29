@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-data: 'Roboto Mono', monospace;
+
+    --c-bg: 40 15% 92%;
+    --c-bg-elevated: 40 12% 90%;
+    --c-panel: 40 10% 88%;
+    --c-panel-hover: 40 8% 84%;
+    --c-edge: 0 0% 70%;
+    --c-edge-dim: 40 10% 80%;
+    --c-edge-bright: 0 0% 50%;
+    --c-muted: 0 0% 42%;
+    --c-foreground: 0 0% 5%;
+
+    --skeleton-base: #e8e4dc;
+    --skeleton-shine: #f0ece4;
+
+    --accent: #00A3FA;
+    --reader-bg: #050505;
+    --ok: #22C55E;
+    --warn: #F59E0B;
+    --danger: #EF4444;
+  }
+
+  .dark {
+    --c-bg: 0 0% 13%;
+    --c-bg-elevated: 0 0% 17%;
+    --c-panel: 0 0% 22%;
+    --c-panel-hover: 0 0% 26%;
+    --c-edge: 0 0% 30%;
+    --c-edge-dim: 0 0% 25%;
+    --c-edge-bright: 0 0% 42%;
+    --c-muted: 0 0% 60%;
+    --c-foreground: 0 0% 100%;
+
+    --skeleton-base: #333333;
+    --skeleton-shine: #3d3d3d;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  * {
+    border-color: hsl(var(--c-edge));
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+  html, body {
+    height: 100%;
+  }
+  #root {
+    min-height: 100dvh;
+  }
+
+  body {
+    background-color: hsl(var(--c-bg));
+    color: hsl(var(--c-foreground));
+    font-family: 'Poppins', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: hsl(var(--c-foreground) / 0.1);
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--c-edge));
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--c-edge-bright));
+  }
+
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .title-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  .title-clamp-1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .font-data {
+    font-family: var(--font-data);
+  }
+  .nav-link {
+    position: relative;
+    transition: opacity 0.3s ease;
+  }
+  .nav-link:hover {
+    opacity: 0.7;
+  }
+  .nav-link.active {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 3px;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--c-edge)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--c-edge));
+    border-radius: 99px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--c-edge-bright));
+  }
+  .reader-container img {
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .safe-bottom {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@layer components {
+  .card-shell {
+    @apply rounded-3xl bg-panel p-[3px];
+  }
+  .card-inner {
+    @apply rounded-[20px] border border-dashed border-edge;
+  }
+  .micro-label {
+    @apply text-[10px] font-semibold uppercase tracking-widest text-foreground/40;
+  }
+  .data-value {
+    @apply font-data text-xs text-foreground/60;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+           bg-foreground text-background text-xs font-semibold
+           hover:opacity-90 active:opacity-90 transition-opacity
+           disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+           border border-dashed border-edge text-xs text-foreground/50
+           hover:border-edge-bright hover:text-foreground/80
+           active:border-edge-bright active:text-foreground/80 transition-colors
+           disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .chip-active {
+    @apply px-3 py-1 rounded-full text-xs font-semibold
+           bg-foreground/10 border border-dashed border-edge-bright text-foreground/80;
+  }
+  .chip-inactive {
+    @apply px-3 py-1 rounded-full text-xs font-medium
+           border border-dashed border-edge text-foreground/40
+           hover:border-edge-bright hover:text-foreground/60
+           active:border-edge-bright active:text-foreground/60 transition-all;
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-base) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes modal-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dot-blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.dot-blink {
+  animation: dot-blink 1.4s infinite both;
+}
+
+@keyframes dash-breathe {
+  0%, 100% { outline-offset: -8px; outline-color: hsl(var(--c-edge-bright) / 0.5); }
+  50%       { outline-offset: -4px; outline-color: hsl(var(--c-edge-bright) / 1); }
+}
+
+.dash-breathe {
+  animation: dash-breathe 2.5s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.35s ease-out both;
+}

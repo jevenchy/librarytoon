@@ -1,0 +1,14 @@
+{
+  "id": "mangasusuku",
+  "baseUrl": "https://mangasusuku.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "https://mangasusuku.com/komik/one-piece/",
+  "chapterUrl": "https://mangasusuku.com/one-piece-chapter-1/",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "nsfw",
+  "color": "#a855f7",
+  "proxyImages": true,
+  "enabled": true
+}

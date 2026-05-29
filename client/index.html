@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="description" content="Search and read manhwa across all sources — in one place." />
+    <title>Librarytoon</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Roboto+Mono:wght@100..700&family=Inter:wght@500;900&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <script>
+      (function() {
+        var html = document.documentElement;
+        var themes = ["light", "dark"];
+        var defaultTheme = "dark";
+        function applyTheme(t) {
+          html.classList.remove.apply(html.classList, themes);
+          html.classList.add(t);
+          html.style.colorScheme = t;
+        }
+        try {
+          var stored = localStorage.getItem("lt:ui:theme") || localStorage.getItem("theme") || defaultTheme;
+          var sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          applyTheme(stored === "system" ? (sysDark ? "dark" : "light") : stored);
+        } catch(e) { applyTheme(defaultTheme); }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

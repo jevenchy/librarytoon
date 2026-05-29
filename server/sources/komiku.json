@@ -1,0 +1,15 @@
+{
+  "id": "komiku",
+  "baseUrl": "https://komiku.org",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "sfw",
+  "color": "#8b5cf6",
+  "proxyImages": true,
+  "wpReaderKiru": false,
+  "enabled": true
+}

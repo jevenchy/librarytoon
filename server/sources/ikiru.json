@@ -1,0 +1,17 @@
+{
+  "id": "ikiru",
+  "baseUrl": "https://05.ikiru.wtf",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "sfw",
+  "color": "#6366f1",
+  "proxyImages": true,
+  "wpReaderKiru": true,
+  "concurrencyLimit": 1,
+  "retryDelay": 1500,
+  "enabled": true
+}

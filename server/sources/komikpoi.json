@@ -1,0 +1,15 @@
+{
+  "id": "komikpoi",
+  "baseUrl": "https://komikpoi.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "https://komikpoi.com/manga/komik-hentai-hijab-cermin-girang/",
+  "chapterUrl": "https://komikpoi.com/komik-hentai-hijab-cermin-girang-chapter-cermin/",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "nsfw",
+  "color": "#71717a",
+  "proxyImages": true,
+  "titleFromPipe": true,
+  "enabled": true
+}

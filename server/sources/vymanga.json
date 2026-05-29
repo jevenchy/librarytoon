@@ -1,0 +1,15 @@
+{
+  "id": "vymanga",
+  "baseUrl": "https://vymanga.co",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "https://vymanga.co/manga/the-peaceful-life-of-a-maid-who-hides-her-power-and-enjoys-it",
+  "chapterUrl": "https://vymanga.co/read/the-peaceful-life-of-a-maid-who-hides-her-power-and-enjoys-it/3056125",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "mixed",
+  "color": "#22c55e",
+  "proxyImages": true,
+  "knownMissing": ["type", "seriesUpdatedAt"],
+  "enabled": true
+}

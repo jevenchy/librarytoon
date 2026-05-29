@@ -1,0 +1,19 @@
+{
+  "id": "komikindo",
+  "baseUrl": "https://komikindo.ch",
+  "method": "api",
+  "urlFormat": "numeric",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "https://komikindo.ch/wp-json/apk/v2",
+  "language": "id",
+  "contentRating": "sfw",
+  "color": "#f43f5e",
+  "searchParam": "s",
+  "proxyImages": true,
+  "wpFetchDates": true,
+  "apiEnvelope": "auto",
+  "apiPagination": "none",
+  "apiChapterEndpoints": ["/manga/{titleId}"],
+  "enabled": true
+}

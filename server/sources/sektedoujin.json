@@ -1,0 +1,15 @@
+{
+  "id": "sektedoujin",
+  "baseUrl": "https://sektedoujin.cc",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "nsfw",
+  "color": "#ef4444",
+  "proxyImages": true,
+  "wpReaderKiru": false,
+  "enabled": true
+}

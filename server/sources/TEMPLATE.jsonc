@@ -1,0 +1,116 @@
+// Copy, rename to yoursource.json, fill required fields, add only overrides.
+{
+  "id": "yoursource",
+  "baseUrl": "https://example.com",            // no trailing slash
+  "method": "html",                    // "html" | "wordpress" | "api" | "graphql" | "nextjs" | "nuxtjs"
+  "urlFormat": "slug",                 // "slug" | "uuid" | "numeric"
+
+  // required for "html"
+  "seriesUrl": "https://example.com/series/example-title/",
+
+  // required for "html"
+  "chapterUrl": "https://example.com/chapter/example-1/",
+
+  // required for "api" or "graphql", or when the API domain differs from baseUrl
+  "apiBase": "https://api.example.com",
+
+  "language": "id",
+  "contentRating": "sfw",              // "sfw" | "nsfw" | "mixed"
+  "color": "#000000",
+
+  // "searchParam": "s",
+  // "searchEndpoints": [],            // ordered URL templates; {base} and {q} are replaced
+  // "searchLimit": 20,
+  // "searchSupported": true,          // set false to disable search entirely
+  // "searchAjaxFallback": true,       // set false to skip the Madara AJAX search probe
+  // "searchListingFallback": true,    // set false to skip full listing fallback
+  // "listingUrl": "",
+
+  // "proxyImages": false,             // route images through /api/img (bypasses ISP DNS block via DoH)
+  // "imageCdn": "",                   // CDN domain for images when it differs from baseUrl
+  // "imageReferer": "",
+  // "imageExtensions": ["jpg", "jpeg", "png", "webp", "gif"],
+  // "imageExcludeKeywords": ["logo", "icon", "avatar"],
+  // "imageBase64Encoded": false,
+  // "imageUrlPattern": "",            // JS regex; match replaced with imageUrlReplacement ($1, $2 for groups)
+  // "imageUrlReplacement": "",
+  // "imageStripQueryParams": false,
+  // "imageMinWidth": 100,
+
+  // "titleFromPipe": false,           // extract title from the segment after " | " in the <title> tag
+  // "chapterNumberPattern": "(?:chapter|ch|bab|episode|ep)[.\\s#-]*(\\d+(?:\\.\\d+)?)",
+  // "chaptersAscending": false,
+  // "chapterDeduplicate": true,
+  // "chapterBatchSize": 100,
+  // "nestedChapterIds": false,
+
+  // "selectors": {
+  //   "searchItem":          ".bsx",
+  //   "searchTitle":         ".tt",
+  //   "searchCover":         "img",
+  //   "searchLatestChapter": ".epxs",
+  //   "searchStatus":        "",
+  //   "chapterItem":         "#chapterlist li",
+  //   "chapterLink":         "a",
+  //   "chapterTitle":        "",
+  //   "chapterDate":         ".chapterdate",
+  //   "pageImage":           "#readerarea img",
+  //   "imageAttr":           "data-src",
+  //   "seriesCover":         ".thumb img",
+  //   "seriesDescription":   ".entry-content p",
+  //   "seriesStatus":        "",
+  //   "seriesGenres":        ".mgen a"
+  // },
+
+  // "wpReaderKiru": "auto",           // "auto" tries RK first then falls back; true = RK only; false = skip
+  // "wpApiPath": "/wp-json/wp/v2",
+  // "wpReaderKiruPath": "/wp-json/readerkiru/v1",
+  // "wpMangaEndpoint": "manga",
+  // "wpChapterEndpoint": "chapter",
+  // "wpChaptersPerPage": 100,
+  // "wpCoverBatchSize": 5,
+  // "wpTheme": "auto",                // "auto" | "madara" | "wpmanga" | "comicsera" | "generic"
+  // "wpYoastCover": true,
+  // "wpSkipReaderKiru": false,        // skip ReaderKiru probe (saves a failed request on non-RK sites)
+
+  // "apiEnvelope": "auto",            // "auto" | "retcode" | "success" | "wrapped" | "bare" | "laravel"
+  // "apiPagination": "page",          // "page" | "offset" | "cursor" | "none"
+  // "apiCursorField": "next_cursor",
+  // "apiTotalPagesField": "total_pages",
+  // "apiSearchEndpoints": [],
+  // "apiChapterEndpoints": [],
+  // "apiPageEndpoints": [],
+  // "apiFieldMap": {},
+  // "apiChapterFieldMap": {},
+  // "apiPageFieldMap": {},
+
+  // "graphqlEndpoint": "",
+  // "graphqlSearchQuery": "",
+  // "graphqlSearchVar": "query",
+  // "graphqlChaptersQuery": "",
+  // "graphqlPagesQuery": "",
+  // "graphqlSearchPath": "",
+  // "graphqlChaptersPath": "",
+  // "graphqlPagesPath": "",
+
+  // "nextDataPath": "",
+  // "nextChaptersPath": "",
+  // "nextPagesPath": "",
+  // "nuxtDataPath": "",
+  // "nuxtChaptersPath": "",
+  // "nuxtPagesPath": "",
+
+  // "headers": {},
+  // "userAgent": "Mozilla/5.0 ...",
+  // "timeouts": { "search": 10000, "chapters": 20000, "pages": 20000 },
+  // "concurrencyLimit": 8,
+  // "retries": 2,
+  // "retryOn": [],                    // extra status codes to retry beyond 5xx (e.g. [429])
+  // "retryDelay": 500,                // static ms between retries; omit for exponential backoff
+  // "rateLimit": 0,                   // reserved, not yet implemented
+  // "rateLimitCooldown": 5000,        // cooldown ms after a 429 response
+
+  // "knownMissing": [],                // fields the source structurally cannot provide
+
+  "enabled": false                     // set true only after manual testing
+}

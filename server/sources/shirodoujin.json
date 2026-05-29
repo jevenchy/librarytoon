@@ -1,0 +1,14 @@
+{
+  "id": "shirodoujin",
+  "baseUrl": "https://shirodoujin.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "https://shirodoujin.com/series/stepmothers-friends/",
+  "chapterUrl": "https://shirodoujin.com/stepmothers-friends-chapter-1/",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "nsfw",
+  "color": "#64748b",
+  "proxyImages": true,
+  "enabled": true
+}

@@ -1,0 +1,14 @@
+{
+  "id": "shinigami",
+  "baseUrl": "https://08.shinigami.asia",
+  "method": "api",
+  "urlFormat": "slug",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "https://api.shngm.io/v1",
+  "language": "id",
+  "contentRating": "sfw",
+  "color": "#f59e0b",
+  "apiEnvelope": "retcode",
+  "enabled": true
+}

@@ -1,0 +1,14 @@
+{
+  "id": "luvyaa",
+  "baseUrl": "https://v4.luvyaa.co",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "https://v4.luvyaa.co/how-to-heal-a-sick-childhood-friend/",
+  "chapterUrl": "https://v4.luvyaa.co/how-to-heal-a-sick-childhood-friend-chapter-1/",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "mixed",
+  "color": "#f97316",
+  "proxyImages": true,
+  "enabled": true
+}

@@ -1,0 +1,15 @@
+{
+  "id": "komiktap",
+  "baseUrl": "https://komiktap.info",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "",
+  "chapterUrl": "",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "nsfw",
+  "color": "#eab308",
+  "proxyImages": true,
+  "wpReaderKiru": false,
+  "enabled": true
+}

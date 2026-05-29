@@ -1,0 +1,14 @@
+{
+  "id": "komikdewasa",
+  "baseUrl": "https://komikdewasa.mom",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "https://komikdewasa.mom/komik/satu-satunya-pria-di-militer/",
+  "chapterUrl": "https://komikdewasa.mom/satu-satunya-pria-di-militer-chapter-01/",
+  "apiBase": "",
+  "language": "id",
+  "contentRating": "nsfw",
+  "color": "#ec4899",
+  "proxyImages": true,
+  "enabled": true
+}
