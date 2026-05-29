@@ -1,12 +1,15 @@
 import { LRUCache } from "lru-cache";
 
+const MAX_ENTRIES = 2000;
+
 const stores = new Map<string, LRUCache<string, NonNullable<unknown>>>();
+const inflight = new Map<string, Promise<unknown>>();
 
 function getStore(namespace: string, ttl: number): LRUCache<string, NonNullable<unknown>> {
   const key = `${namespace}:${ttl}`;
   let store = stores.get(key);
   if (!store) {
-    store = new LRUCache<string, NonNullable<unknown>>({ max: 500, ttl });
+    store = new LRUCache<string, NonNullable<unknown>>({ max: MAX_ENTRIES, ttl });
     stores.set(key, store);
   }
   return store;
@@ -22,9 +25,21 @@ export const cache = {
   async wrap<T>(namespace: string, ttl: number, key: string, fn: () => Promise<T>): Promise<T> {
     const hit = this.get<T>(namespace, ttl, key);
     if (hit !== undefined) return hit;
-    const value = await fn();
-    this.set(namespace, ttl, key, value);
-    return value;
+
+    const inflightKey = `${namespace}:${key}`;
+    const pending = inflight.get(inflightKey);
+    if (pending) return pending as Promise<T>;
+
+    const promise = fn().then(value => {
+      this.set(namespace, ttl, key, value);
+      inflight.delete(inflightKey);
+      return value;
+    }).catch(err => {
+      inflight.delete(inflightKey);
+      throw err;
+    });
+    inflight.set(inflightKey, promise);
+    return promise;
   },
   invalidate(namespace: string): void {
     for (const [k, store] of stores) {

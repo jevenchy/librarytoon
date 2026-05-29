@@ -492,16 +492,20 @@ export default function Detail() {
       </div>
 
       {error && (
-        <div className="mb-4 flex flex-col items-center gap-2">
-          <ErrorMessage message={error} sourceId={sourceId} className="w-full" />
-          <button
-            onClick={retry}
-            className="inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/70 active:text-foreground/70 transition-colors"
-          >
-            <FiRefreshCw size={14} className={retrying ? "animate-spin" : ""} />
-            Retry
-          </button>
-        </div>
+        <ErrorMessage
+          message={error}
+          sourceId={sourceId}
+          className="w-full mb-4"
+          action={
+            <button
+              onClick={retry}
+              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/70 active:text-foreground/70 transition-colors"
+            >
+              <FiRefreshCw size={14} className={retrying ? "animate-spin" : ""} />
+              Retry
+            </button>
+          }
+        />
       )}
 
       {!error && chapters.length === 0 && ready && (

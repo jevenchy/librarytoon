@@ -1,9 +1,11 @@
+import React from "react";
 import { FiWifiOff } from "react-icons/fi";
 
 interface ErrorMessageProps {
   message: string;
   sourceId?: string;
   className?: string;
+  action?: React.ReactNode;
 }
 
 function friendlyError(err: string, sourceId?: string): string {
@@ -19,12 +21,13 @@ function friendlyError(err: string, sourceId?: string): string {
   return "An error occurred while loading this content.";
 }
 
-export default function ErrorMessage({ message, sourceId, className }: ErrorMessageProps) {
+export default function ErrorMessage({ message, sourceId, className, action }: ErrorMessageProps) {
   return (
     <div className={`rounded-3xl bg-panel p-2 ${className ?? ""}`}>
       <div className="rounded-2xl border border-dashed border-edge-bright p-6 flex flex-col items-center gap-2">
         <FiWifiOff size={20} className="text-foreground/20" />
         <p className="text-sm text-foreground/40 text-center">{friendlyError(message, sourceId)}</p>
+        {action}
       </div>
     </div>
   );
