@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { KEYS } from "../../lib/storageKeys.js";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useUiStore } from "../../store/ui.js";
@@ -23,8 +23,12 @@ function MoonIcon() {
 }
 
 export default function Layout() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const [open, setOpen] = useState(false);
+
+  const lastHomeSearch = useRef("");
+  if (pathname === "/") lastHomeSearch.current = location.search;
   const isReader = pathname.startsWith("/read/") || pathname.startsWith("/range/");
   const [theme, setTheme] = useState<"dark" | "light">(() =>
     document.documentElement.classList.contains("dark") ? "dark" : "light"
@@ -56,7 +60,7 @@ export default function Layout() {
       <header className={`hidden lg:block sticky top-0 z-20 bg-bg transition-opacity duration-300 ${!isReader ? "opacity-100" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
         <div className="mx-auto max-w-content px-6 h-14 flex items-center justify-between">
           <Link
-            to="/"
+            to={`/${lastHomeSearch.current}`}
             className={`text-base font-semibold tracking-[0.2em] uppercase transition-colors select-none ${
               isActive("/") ? "text-foreground" : "text-foreground/60 hover:text-foreground active:text-foreground"
             }`}
@@ -102,7 +106,7 @@ export default function Layout() {
         >
           <FiMenu size={28} />
         </button>
-        <Link to="/">
+        <Link to={`/${lastHomeSearch.current}`}>
           <img src="/logo-white.png" alt="Librarytoon" className="h-8 hidden dark:block select-none" draggable={false} />
           <img src="/logo-black.png" alt="Librarytoon" className="h-8 block dark:hidden select-none" draggable={false} />
         </Link>
@@ -140,7 +144,7 @@ export default function Layout() {
         </div>
         <nav className="flex flex-col gap-6 px-6 pt-8">
           <Link
-            to="/"
+            to={`/${lastHomeSearch.current}`}
             onClick={() => setOpen(false)}
             className={`text-xl font-semibold uppercase transition-colors ${
               isActive("/")

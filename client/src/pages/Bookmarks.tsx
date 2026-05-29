@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { KEYS } from "../lib/storageKeys.js";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FiChevronLeft, FiBookmark, FiSearch, FiX } from "react-icons/fi";
 import Card from "../components/ui/Card.js";
 import EmptyState from "../components/ui/EmptyState.js";
@@ -17,6 +17,7 @@ interface BookmarkItem {
 }
 
 export default function Bookmarks() {
+  const navigate = useNavigate();
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [search, setSearch]       = useState("");
   const [page, setPage]           = useState(1);
@@ -74,13 +75,13 @@ export default function Bookmarks() {
     <div className="mx-auto max-w-content px-6 py-10 min-h-[100dvh] flex flex-col">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-1">
-          <Link
-            to="/"
+          <button
+            onClick={() => navigate(-1)}
             className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/80 active:text-foreground/80 transition-colors"
           >
             <FiChevronLeft size={14} />
             Back
-          </Link>
+          </button>
           <h1 className="text-sm font-bold text-foreground/90 tracking-wide">Bookmarks</h1>
         </div>
         <p className="mt-1 text-sm text-foreground/60">

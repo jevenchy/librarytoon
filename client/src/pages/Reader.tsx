@@ -142,7 +142,7 @@ export default function ReaderPage() {
           hint="This source is not responding. It may be temporarily down. Try again later."
           action={
             <Link
-              to="/"
+              to={backPath ?? "/"}
               className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/80 transition-colors"
             >
               <FiArrowLeft size={12} />
@@ -162,7 +162,7 @@ export default function ReaderPage() {
           message="No pages available for this chapter."
           action={
             <Link
-              to="/"
+              to={backPath ?? "/"}
               className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/80 transition-colors"
             >
               <FiArrowLeft size={12} />

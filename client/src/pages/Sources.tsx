@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiPlus, FiX, FiGlobe, FiCopy, FiCheck, FiChevronLeft } from "react-icons/fi";
 import { api } from "../lib/api.js";
 import { useSourcesStore } from "../store/sources.js";
@@ -233,6 +233,7 @@ const TEMPLATE = `{
 }`;
 
 export default function Sources() {
+  const navigate = useNavigate();
   useEffect(() => {
     document.title = "Sources - Librarytoon";
     return () => { document.title = "Librarytoon"; };
@@ -283,13 +284,13 @@ export default function Sources() {
 
       <div className="mb-8">
         <div className="flex items-center justify-between mb-1">
-          <Link
-            to="/"
+          <button
+            onClick={() => navigate(-1)}
             className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/80 active:text-foreground/80 transition-colors"
           >
             <FiChevronLeft size={14} />
             Back
-          </Link>
+          </button>
           <h1 className="text-sm font-bold text-foreground/90 tracking-wide">Sources</h1>
         </div>
         <p className="mt-1 text-sm text-foreground/60">

@@ -160,7 +160,7 @@ export default function Reader({
             <div className="rounded-2xl border border-dashed border-edge-bright px-4 py-3">
               <div className="flex items-center gap-3">
                 <Link
-                  to="/"
+                  to={backPath ?? "/"}
                   aria-label="Home"
                   className="inline-flex items-center justify-center w-8 h-8 rounded-full shrink-0
                              border border-dashed border-edge-bright text-foreground/50
