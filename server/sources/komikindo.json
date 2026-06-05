@@ -1,0 +1,25 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "komikindo",
+  "baseUrl": "https://komikindo.fit",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/",
+  "wordpress": {
+    "theme": "madara",
+    "skipReaderKiru": true,
+    "seriesEndpoint": "manga",
+    "chapterEndpoint": "chapter"
+  },
+  "proxyImages": true,
+  "imageReferer": "https://komikindo.fit",
+  "search": {
+    "ajaxFallback": false
+  },
+  "knownMissing": ["seriesUpdatedAt"],
+  "color": "#f43f5e",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "kiryuu",
+  "baseUrl": "https://kiryuu.online",
+  "method": "api",
+  "urlFormat": "slug",
+  "apiBase": "https://kiryuu.online/api",
+  "api": {
+    "envelope": "auto"
+  },
+  "proxyImages": true,
+  "search": {
+    "param": "q"
+  },
+  "chapterIdWithTitle": true,
+  "knownMissing": ["alternativeTitle", "chapterUpdatedAt"],
+  "color": "#06b6d4",
+  "contentRating": "sfw",
+  "language": "id",
+  "enabled": true
+}

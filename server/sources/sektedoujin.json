@@ -1,0 +1,16 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "sektedoujin",
+  "baseUrl": "https://sektedoujin.cc",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "wordpress": {
+    "readerKiru": false
+  },
+  "proxyImages": true,
+  "imageReferer": "https://sektedoujin.cc",
+  "color": "#ef4444",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}

@@ -1,0 +1,32 @@
+# Dependencies & Build
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Environment
+.env*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Cache & Temp
+.cache/
+*.tmp
+*.temp
+
+# Audit output
+/script/*.audit.md
+
+# Lock files
+package-lock.json
+
+# Editor
+.vscode/
+.claude/
+
+# OS
+Thumbs.db

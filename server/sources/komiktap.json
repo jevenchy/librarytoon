@@ -1,0 +1,19 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "komiktap",
+  "baseUrl": "https://komiktap.info",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "wordpress": {
+    "readerKiru": false
+  },
+  "proxyImages": true,
+  "imageReferer": "https://komiktap.info",
+  "network": {
+    "timeouts": { "search": 8000, "chapters": 15000, "pages": 15000 }
+  },
+  "color": "#eab308",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}

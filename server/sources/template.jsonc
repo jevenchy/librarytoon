@@ -1,0 +1,137 @@
+// LIBRARYTOON SOURCE CONFIG TEMPLATE
+// Copy to <id>.json, strip comments, fill values. Keep one method block.
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "mysite",                   // unique, lowercase, alphanumeric + dashes only
+  "baseUrl": "https://example.com", // no trailing slash, only field needing the full domain
+  "method": "html",                 // html | wordpress | api
+  // "fallback": ["html"],          // default, [] disables, ["wordpress","html"] custom order
+  "urlFormat": "slug",              // slug | numeric | uuid
+
+  // Method block (keep one, delete others)
+
+  // html (default)
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/chapter/",
+  "selectors": {
+    "searchItem":                ".bsx",                       // container of one search result card
+    "searchTitle":               ".tt",                        // title text inside search card
+    "searchCover":               "img",                        // cover image inside search card
+    "searchLatestChapter":       ".epxs",                      // latest-chapter text inside search card
+    "chapterItem":               "#chapterlist li",            // one row in chapter list
+    "chapterLink":               "a",
+    "chapterTitle":              ".chapternum",                // chapter title/number text inside a row
+    "chapterDate":               ".chapterdate",
+    "chapterDateAttr":           "datetime",                   // attribute holding the chapter date (e.g. <time datetime>)
+    "chapterItemLocked":         ".locked",                    // marks a locked/paid chapter row to skip
+    "pageImage":                 "#readerarea img",
+    "imageAttr":                 "data-src",                   // attribute holding the real image URL
+    "seriesCover":               ".thumb img",                 // cover on the series detail page
+    "seriesType":                ".imptdt a",                  // type (Manhwa/Manga/...) on detail page
+    "seriesGenres":              ".mgen a",                    // genre links on detail page
+    "seriesAltTitle":            ".alternative",               // alternative title on detail page
+    "seriesDescription":         "[itemprop='description'] p", // synopsis on detail page
+    "seriesDescriptionAstroKey": "postContent",                // Astro island prop key holding the description
+    "seriesCoverAstroKey":       "featuredImage",              // Astro island prop key holding the cover URL
+    "seriesAltTitleAstroKey":    "titles"                      // Astro island prop key holding alt titles
+  },
+
+  // api
+  //  "seriesUrl": "/series/",
+  //  "chapterUrl": "/series/{slug}/",
+  //  "apiBase": "https://api.example.com",          // required when API domain differs from baseUrl
+  //  "api": {
+  //    "envelope": "auto",                          // auto | retcode | success | wrapped | bare | laravel
+  //    "pagination": "page",                        // page | offset | cursor | none
+  //    "cursorField": "",                           // response field holding the next cursor (pagination: cursor)
+  //    "totalPagesField": "totalPages",             // response field with total page count (pagination: page)
+  //    "slugSuffix": "",                            // appended to the slug when building endpoint URLs
+  //    "searchEndpoints":    ["{base}/search?q={q}"],
+  //    "titleInfoEndpoints": ["/series/{titleId}"], // configurable title-info endpoint(s), {titleId} substituted
+  //    "chapterEndpoints":   ["/manga/{titleId}/chapters"],
+  //    "pageEndpoints":      ["/chapter/{chapterId}"],
+  //    "fieldMap": {                                // search/title-info fields -> result (first present key wins)
+  //      "id":      ["slug", "id"],
+  //      "title":   ["title"],
+  //      "cover":   ["cover_image_url", "coverImage"],
+  //      "chapter": ["latest_chapter_number"],
+  //      "type":    ["seriesType"],
+  //      "genres":  ["genres"]
+  //    },
+  //    "chapterFieldMap": {                         // chapter-list response fields -> Chapter
+  //      "id":     ["slug"],
+  //      "number": ["number"],
+  //      "title":  ["title"],
+  //      "date":   ["createdAt"]
+  //    },
+  //    "pageFieldMap": { "images": ["images"] }     // response field holding the page-image array
+  //  },
+
+  // wordpress
+  //  "seriesUrl": "/manga/",
+  //  "chapterUrl": "/",
+  //  "wordpress": {
+  //    "theme": "madara",         // auto | madara | wpmanga | comicsera | generic
+  //    "seriesEndpoint": "manga", // WP REST post type for series (default: manga)
+  //    "chapterEndpoint": "chapter",
+  //    "skipReaderKiru": true,    // skip ReaderKiru probe when site is known not to use it
+  //    "readerKiru": "auto"       // auto | true | false
+  //  },
+
+  // Optional overrides (include only what applies)
+
+  // "nextRsc": false,  // true for Next.js App Router sources (extracts data from RSC stream)
+  "proxyImages": false, // route images through /api/img (bypasses ISP DNS blocks via DoH)
+  "imageReferer": "",   // Referer header sent with proxied image requests
+  // "imageCdn": "",    // host prefix for RELATIVE image paths (e.g. "/foo.jpg"). Absolute image URLs are used as-is
+
+  // Rarely needed. Sensible defaults live in code, so add a block below only to override it.
+
+  //  "images": {
+  //    "extensions": ["jpg", "jpeg", "png", "webp", "gif"],
+  //    "excludeKeywords": ["logo", "icon", "avatar"],
+  //    "base64Encoded": false,
+  //    "urlPattern": "",    // JS regex, matched portion replaced with urlReplacement
+  //    "urlReplacement": "",
+  //    "stripQueryParams": false,
+  //    "minWidth": 100,
+  //    "coverOptimizer": "" // route same-origin cover via an optimizer, {url} = encoded cover path (e.g. "/_next/image?url={url}&w=640&q=75")
+  //  },
+
+  //  "network": {
+  //    "userAgent": "Mozilla/5.0 ...",
+  //    "headers": {},     // extra request headers merged with defaults
+  //    "timeouts": { "search": 10000, "chapters": 20000, "pages": 20000 },
+  //    "concurrencyLimit": 8,
+  //    "retries": 2,
+  //    "retryOn": [],     // extra status codes to retry beyond 5xx (e.g. [429])
+  //    "retryDelay": 500, // ms between retries. Omit for exponential backoff
+  //    "rateLimit": 0,
+  //    "rateLimitCooldown": 5000
+  //  },
+
+  //  "search": {
+  //    "param": "s",            // query string parameter name (default: "s")
+  //    "endpoints": [],         // override all search URLs, {base} and {q} substituted
+  //    "limit": 40,
+  //    "supported": true,       // false to disable search entirely for this source
+  //    "ajaxFallback": true,    // false to skip the AJAX search probe
+  //    "listingFallback": true, // false to skip full listing fallback
+  //    "listingUrl": ""         // explicit URL for last-resort listing fallback
+  //  },
+
+  // "titleFromPipe": false,
+  // "chapterNumberPattern": "(?:chapter|ch|bab|episode|ep)[.\\s#-]*(\\d+(?:\\.\\d+)?)",
+  // "chaptersAscending": false,
+  // "chapterDeduplicate": true,
+  // "chapterBatchSize": 100,
+  // "nestedChapterIds": false,
+  // "chapterIdWithTitle": false, // prefix chapter IDs with "{titleId}/"
+
+  "knownMissing": [],     // fields the source structurally cannot provide
+
+  "color": "#0000",       // hex badge color shown in the UI
+  "contentRating": "sfw", // sfw | nsfw
+  "language": "id",       // ISO 639-1 code, default "id"
+  "enabled": false        // set true only after manual testing
+}

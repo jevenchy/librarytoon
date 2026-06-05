@@ -1,0 +1,22 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "thunderscans",
+  "baseUrl": "https://en-thunderscans.com",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "/comics/",
+  "chapterUrl": "/",
+  "wordpress": {
+    "theme": "madara",
+    "skipReaderKiru": true,
+    "seriesEndpoint": "comics"
+  },
+  "selectors": {
+    "seriesAltTitle": ".alternative .desktop-titles"
+  },
+  "proxyImages": true,
+  "color": "#3b82f6",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": true
+}

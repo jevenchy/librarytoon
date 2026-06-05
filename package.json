@@ -1,0 +1,52 @@
+{
+  "name": "librarytoon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development node --watch-path=./server --watch-path=./shared --import=tsx/esm server/index.ts",
+    "build": "tsx script/build.ts",
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "cross-env": "^10.1.0",
+    "express": "^4.21.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "lru-cache": "^11.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.4.0",
+    "react-router-dom": "^6.27.0",
+    "zod": "^3.23.8",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^4.1.7"
+  }
+}

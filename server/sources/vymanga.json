@@ -1,0 +1,18 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "vymanga",
+  "baseUrl": "https://vymanga.co",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/read/{slug}/",
+  "selectors": {
+    "seriesCover": ".img-manga img"
+  },
+  "proxyImages": true,
+  "knownMissing": ["type", "seriesUpdatedAt"],
+  "color": "#22c55e",
+  "contentRating": "nsfw",
+  "language": "en",
+  "enabled": true
+}

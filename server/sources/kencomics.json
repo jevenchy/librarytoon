@@ -1,0 +1,42 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "kencomics",
+  "baseUrl": "https://kencomics.com",
+  "method": "api",
+  "urlFormat": "slug",
+  "seriesUrl": "/series/",
+  "chapterUrl": "/series/{slug}/",
+  "apiBase": "https://api.kencomics.com",
+  "api": {
+    "searchEndpoints": ["/api/posts?searchTerm={q}"],
+    "fieldMap": {
+      "id": ["slug"],
+      "title": ["postTitle"],
+      "cover": ["featuredImage"],
+      "type": ["seriesType"]
+    }
+  },
+  "selectors": {
+    "chapterTitle": "span.font-medium",
+    "pageImage": "figure.image-container img[src^='https://storage.kencomics.com']",
+    "seriesDescriptionAstroKey": "postContent",
+    "seriesCoverAstroKey": "featuredImage",
+    "seriesAltTitleAstroKey": "titles",
+    "seriesType": "div.inline span"
+  },
+  "proxyImages": true,
+  "imageReferer": "https://kencomics.com",
+  "images": {
+    "excludeKeywords": ["featured", "logo", "icon", "avatar"],
+    "urlPattern": "storage\\.kenscans\\.org",
+    "urlReplacement": "storage.kencomics.com"
+  },
+  "search": {
+    "ajaxFallback": false,
+    "listingFallback": false
+  },
+  "color": "#2563eb",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": true
+}

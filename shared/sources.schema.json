@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "librarytoon-source-config",
+  "title": "Librarytoon Source Config",
+  "description": "Schema for server/sources/<id>.json files",
+  "type": "object",
+  "required": ["id", "baseUrl", "method", "enabled"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique source identifier (lowercase alphanumeric + dashes)"
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Site root URL - no trailing slash"
+    },
+    "method": {
+      "type": "string",
+      "enum": ["html", "wordpress", "api"]
+    },
+    "enabled": { "type": "boolean" },
+    "urlFormat": {
+      "type": "string",
+      "enum": ["slug", "uuid", "numeric"],
+      "default": "slug"
+    },
+    "seriesUrl": { "type": "string" },
+    "chapterUrl": { "type": "string" },
+    "apiBase": {
+      "type": "string",
+      "description": "Override API base URL when it differs from baseUrl"
+    },
+    "createdAt": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "language": { "type": "string" },
+    "contentRating": { "type": "string", "enum": ["sfw", "nsfw"] },
+    "note": { "type": "string" },
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{3,8}$" },
+    "official": { "type": "boolean" },
+    "titleAfterPipe": { "type": "boolean" },
+    "titleFromPipe": { "type": "boolean" },
+    "seriesPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefix": { "type": "string" },
+        "suffix": { "type": "string" }
+      }
+    },
+    "chapterPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefix": { "type": "string" },
+        "suffix": { "type": "string" }
+      }
+    },
+    "nestedChapterIds": { "type": "boolean" },
+    "chapterNumberPattern": { "type": "string" },
+    "chaptersAscending": { "type": "boolean" },
+    "chapterDeduplicate": { "type": "boolean" },
+    "chapterBatchSize": { "type": "integer", "minimum": 1 },
+    "chapterIdWithTitle": { "type": "boolean" },
+    "proxyImages": { "type": "boolean" },
+    "imageCdn": { "type": "string" },
+    "imageReferer": { "type": "string" },
+    "nextRsc": { "type": "boolean" },
+    "fallback": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["html", "wordpress", "api"] },
+      "description": "Ordered fallback method chain. Default: [\"html\"] for non-html methods. Empty array disables fallback."
+    },
+    "knownMissing": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Fields this source structurally cannot provide (suppresses audit warnings)"
+    },
+    "selectors": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "CSS selector overrides for the HTML adapter",
+      "properties": {
+        "searchItem": { "type": "string" },
+        "searchTitle": { "type": "string" },
+        "searchCover": { "type": "string" },
+        "searchLatestChapter": { "type": "string" },
+        "chapterItem": { "type": "string" },
+        "chapterLink": { "type": "string" },
+        "chapterTitle": { "type": "string" },
+        "chapterDate": { "type": "string" },
+        "chapterDateAttr": { "type": "string" },
+        "chapterItemLocked": { "type": "string" },
+        "pageImage": { "type": "string" },
+        "imageAttr": { "type": "string" },
+        "seriesCover": { "type": "string" },
+        "seriesDescription": { "type": "string" },
+        "seriesDescriptionAstroKey": { "type": "string" },
+        "seriesCoverAstroKey": { "type": "string" },
+        "seriesAltTitleAstroKey": { "type": "string" },
+        "seriesGenres": { "type": "string" },
+        "seriesType": { "type": "string" },
+        "seriesAltTitle": { "type": "string" }
+      }
+    },
+    "wordpress": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "WordPress adapter settings (method: wordpress)",
+      "properties": {
+        "theme": { "type": "string", "enum": ["auto", "madara", "wpmanga", "comicsera", "generic"] },
+        "apiPath": { "type": "string", "default": "/wp-json/wp/v2" },
+        "readerKiru": {
+          "description": "\"auto\": try ReaderKiru first then fallback; true = RK only; false = skip",
+          "oneOf": [{ "type": "string", "enum": ["auto"] }, { "type": "boolean" }]
+        },
+        "readerKiruPath": { "type": "string", "default": "/wp-json/readerkiru/v1" },
+        "skipReaderKiru": { "type": "boolean" },
+        "seriesEndpoint": { "type": "string", "default": "manga" },
+        "chapterEndpoint": { "type": "string", "default": "chapter" },
+        "chaptersPerPage": { "type": "integer", "minimum": 1 },
+        "coverBatchSize": { "type": "integer", "minimum": 1 },
+        "yoastCover": { "type": "boolean" },
+        "fetchDates": { "type": "boolean" },
+        "search": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ajaxFallback": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "api": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "API adapter settings (method: api).",
+      "properties": {
+        "envelope": {
+          "type": "string",
+          "enum": ["auto", "retcode", "success", "wrapped", "bare", "laravel"],
+          "default": "auto"
+        },
+        "pagination": {
+          "type": "string",
+          "enum": ["page", "offset", "cursor", "none"],
+          "default": "page"
+        },
+        "cursorField": { "type": "string" },
+        "totalPagesField": { "type": "string" },
+        "searchEndpoints": { "type": "array", "items": { "type": "string" } },
+        "titleInfoEndpoints": { "type": "array", "items": { "type": "string" } },
+        "chapterEndpoints": { "type": "array", "items": { "type": "string" } },
+        "pageEndpoints": { "type": "array", "items": { "type": "string" } },
+        "slugSuffix": { "type": "string" },
+        "fieldMap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id":      { "type": "array", "items": { "type": "string" } },
+            "title":   { "type": "array", "items": { "type": "string" } },
+            "cover":   { "type": "array", "items": { "type": "string" } },
+            "chapter": { "type": "array", "items": { "type": "string" } },
+            "type":    { "type": "array", "items": { "type": "string" } },
+            "genres":  { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "chapterFieldMap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id":     { "type": "array", "items": { "type": "string" } },
+            "number": { "type": "array", "items": { "type": "string" } },
+            "title":  { "type": "array", "items": { "type": "string" } },
+            "date":   { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "pageFieldMap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "images": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "search": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Search behaviour overrides (applies to all methods)",
+      "properties": {
+        "param": { "type": "string", "description": "Query string parameter name for search" },
+        "endpoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered URL templates; {base} and {q} are substituted"
+        },
+        "limit": { "type": "integer", "minimum": 1, "default": 40 },
+        "supported": { "type": "boolean", "default": true },
+        "ajaxFallback": { "type": "boolean", "default": true },
+        "listingFallback": { "type": "boolean", "default": true },
+        "listingUrl": { "type": "string" }
+      }
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Image processing overrides",
+      "properties": {
+        "extensions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["jpg", "jpeg", "png", "webp", "gif"]
+        },
+        "excludeKeywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["logo", "icon", "avatar"]
+        },
+        "base64Encoded": { "type": "boolean" },
+        "urlPattern": { "type": "string", "description": "JS regex; matched portion replaced with urlReplacement" },
+        "urlReplacement": { "type": "string" },
+        "stripQueryParams": { "type": "boolean" },
+        "minWidth": { "type": "integer", "minimum": 0, "default": 100 },
+        "coverOptimizer": { "type": "string", "description": "Template for routing covers through a same-origin image optimizer; {url} is replaced with the encoded cover path. e.g. /_next/image?url={url}&w=640&q=75" }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Network / HTTP overrides",
+      "properties": {
+        "userAgent": { "type": "string" },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "timeouts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "search":   { "type": "integer", "minimum": 1 },
+            "chapters": { "type": "integer", "minimum": 1 },
+            "pages":    { "type": "integer", "minimum": 1 }
+          }
+        },
+        "concurrencyLimit": { "type": "integer", "minimum": 1 },
+        "retries": { "type": "integer", "minimum": 0 },
+        "retryOn": { "type": "array", "items": { "type": "integer" } },
+        "retryDelay": { "type": "integer", "minimum": 0 },
+        "rateLimit": { "type": "integer", "minimum": 0 },
+        "rateLimitCooldown": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

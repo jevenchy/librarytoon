@@ -1,0 +1,38 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "vortexscans",
+  "baseUrl": "https://vortexscans.org",
+  "method": "html",
+  "fallback": ["api"],
+  "urlFormat": "slug",
+  "seriesUrl": "/series",
+  "chapterUrl": "/series/{slug}",
+  "apiBase": "https://api.vortexscans.org",
+  "api": {
+    "searchEndpoints": ["/api/query?searchTerm={q}"],
+    "fieldMap": {
+      "id": ["slug"],
+      "title": ["postTitle"],
+      "cover": ["featuredImage"],
+      "type": ["seriesType"]
+    }
+  },
+  "selectors": {
+    "seriesCover": "img[itemprop='image'],img[itemProp='image']",
+    "seriesGenres": "a[itemprop='genre'],a[itemProp='genre']",
+    "seriesType": "div.inline span",
+    "seriesDescription": "[itemprop='description'] p,[itemProp='description'] p",
+    "seriesDescriptionAstroKey": "postContent",
+    "seriesAltTitle": "div.absolute.invisible > div",
+    "chapterTitle": "span.font-medium",
+    "pageImage": "img[alt*=' Page ']"
+  },
+  "proxyImages": true,
+  "search": {
+    "supported": false
+  },
+  "color": "#7c3aed",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": true
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "kaynscan",
+  "baseUrl": "https://kaynscan.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/series/",
+  "chapterUrl": "/chapter/",
+  "selectors": {
+    "chapterTitle": ".text-sm.truncate",
+    "chapterDateAttr": "d",
+    "chapterItemLocked": "img[src*='material-symbols:lock']",
+    "pageImage": "img[uid]",
+    "imageAttr": "uid",
+    "seriesDescription": "#expand_content p",
+    "seriesType": "div[class*='uppercase'][class*='min-h-8']",
+    "seriesAltTitle": "span.text-md"
+  },
+  "proxyImages": true,
+  "images": {
+    "urlPattern": "^(?!https?://)(.+)$",
+    "urlReplacement": "https://cdn.meowing.org/uploads/$1"
+  },
+  "search": {
+    "listingUrl": "/series/",
+    "ajaxFallback": false
+  },
+  "knownMissing": ["genres"],
+  "color": "#2563eb",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": false
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "komikpoi",
+  "baseUrl": "https://komikpoi.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/",
+  "proxyImages": true,
+  "imageReferer": "https://komikpoi.com",
+  "titleFromPipe": true,
+  "knownMissing": ["alternativeTitle"],
+  "color": "#71717a",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}

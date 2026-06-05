@@ -1,0 +1,19 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "komikcast",
+  "baseUrl": "https://komikcast.site",
+  "method": "api",
+  "urlFormat": "slug",
+  "apiBase": "https://be.komikcast.cc",
+  "api": {
+    "envelope": "retcode"
+  },
+  "proxyImages": true,
+  "search": {
+    "param": "title"
+  },
+  "color": "#0ea5e9",
+  "contentRating": "sfw",
+  "language": "id",
+  "enabled": true
+}

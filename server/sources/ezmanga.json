@@ -1,0 +1,49 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "ezmanga",
+  "baseUrl": "https://ezmanga.org",
+  "method": "api",
+  "urlFormat": "slug",
+  "seriesUrl": "/series/",
+  "chapterUrl": "/series/{slug}/",
+  "apiBase": "https://vapi.ezmanga.org",
+  "api": {
+    "titleInfoEndpoints": ["/api/v1/series/{titleId}"],
+    "chapterEndpoints": ["/api/v1/series/{titleId}/chapters?page={page}"],
+    "pagination": "page",
+    "totalPagesField": "totalPages",
+    "chapterFieldMap": {
+      "id": ["slug"],
+      "number": ["number"],
+      "title": ["title"],
+      "date": ["createdAt"]
+    }
+  },
+  "selectors": {
+    "searchItem": "ul.browse-grid li",
+    "searchTitle": "p.bc-title",
+    "searchCover": "img.bc-img",
+    "seriesGenres": "a.genre-tag",
+    "seriesType": "a.badge--type",
+    "seriesAltTitle": "p.alt-titles",
+    "pageImage": "img[alt^='Page ']"
+  },
+  "proxyImages": true,
+  "imageReferer": "https://ezmanga.org",
+  "network": {
+    "headers": {
+      "Origin": "https://ezmanga.org",
+      "Referer": "https://ezmanga.org/"
+    }
+  },
+  "search": {
+    "endpoints": ["/browse?q={q}"],
+    "ajaxFallback": false,
+    "listingFallback": false
+  },
+  "knownMissing": ["genres"],
+  "color": "#6d28d9",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": true
+}

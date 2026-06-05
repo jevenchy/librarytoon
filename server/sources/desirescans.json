@@ -1,0 +1,22 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "desirescans",
+  "baseUrl": "https://desirescans.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/series/comic/",
+  "chapterUrl": "/series/comic/{slug}/chapter/",
+  "nextRsc": true,
+  "proxyImages": true,
+  "imageReferer": "https://desirescans.com",
+  "images": { "coverOptimizer": "/_next/image?url={url}&w=640&q=75" },
+  "search": {
+    "endpoints": ["/api/search?q={q}"],
+    "ajaxFallback": false,
+    "listingFallback": false
+  },
+  "color": "#e11d48",
+  "contentRating": "nsfw",
+  "language": "en",
+  "enabled": true
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "shinigami",
+  "baseUrl": "https://08.shinigami.asia",
+  "method": "api",
+  "urlFormat": "slug",
+  "apiBase": "https://api.shngm.io/v1",
+  "api": {
+    "envelope": "retcode",
+    "titleInfoEndpoints": ["/manga/detail/{titleId}"]
+  },
+  "color": "#f59e0b",
+  "contentRating": "sfw",
+  "language": "id",
+  "enabled": true
+}

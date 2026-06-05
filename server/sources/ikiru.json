@@ -1,0 +1,20 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "ikiru",
+  "baseUrl": "https://05.ikiru.wtf",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "wordpress": {
+    "readerKiru": true
+  },
+  "proxyImages": true,
+  "imageReferer": "https://05.ikiru.wtf",
+  "network": {
+    "concurrencyLimit": 1,
+    "retryDelay": 1500
+  },
+  "color": "#6366f1",
+  "contentRating": "sfw",
+  "language": "id",
+  "enabled": true
+}

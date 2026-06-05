@@ -1,0 +1,15 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "komikdewasa",
+  "baseUrl": "https://komikdewasa.mom",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/komik/",
+  "chapterUrl": "/",
+  "proxyImages": true,
+  "imageReferer": "https://komikdewasa.mom",
+  "color": "#ec4899",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}

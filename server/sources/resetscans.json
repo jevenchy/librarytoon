@@ -1,0 +1,21 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "resetscans",
+  "baseUrl": "https://reset-scans.org",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/manga/{slug}/chapter-01/",
+  "wordpress": {
+    "theme": "madara",
+    "skipReaderKiru": true,
+    "seriesEndpoint": "manga",
+    "chapterEndpoint": "chapter"
+  },
+  "proxyImages": true,
+  "knownMissing": ["seriesUpdatedAt"],
+  "color": "#ef4444",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": true
+}

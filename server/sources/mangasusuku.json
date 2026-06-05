@@ -1,0 +1,15 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "mangasusuku",
+  "baseUrl": "https://mangasusuku.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/komik/",
+  "chapterUrl": "/",
+  "proxyImages": true,
+  "imageReferer": "https://mangasusuku.com",
+  "color": "#42528c",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}

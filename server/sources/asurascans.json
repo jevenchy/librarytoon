@@ -1,0 +1,39 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "asurascans",
+  "baseUrl": "https://asurascans.com",
+  "apiBase": "https://api.asurascans.com",
+  "method": "html",
+  "fallback": ["api"],
+  "urlFormat": "slug",
+  "seriesUrl": "/comics/",
+  "chapterUrl": "/comics/{slug}/chapter/",
+  "selectors": {
+    "searchItem": ".series-card",
+    "searchTitle": "h3",
+    "searchLatestChapter": "div.flex.items-center.gap-2 span:first-child",
+    "chapterItem": "a[data-astro-prefetch='hover'][href*='/chapter/']",
+    "chapterTitle": "span.font-medium",
+    "seriesDescriptionAstroKey": "description",
+    "seriesGenres": "a[href*='/browse?genres=']",
+    "seriesType": "span.uppercase",
+    "seriesAltTitle": "p#alt-titles",
+    "chapterDate": ".text-right span",
+    "pageImage": "img[data-page-index]"
+  },
+  "api": {
+    "slugSuffix": "-46f09241",
+    "pageEndpoints": ["/api/series/{seriesSlug}/chapters/{chapterSlug}"]
+  },
+  "proxyImages": true,
+  "imageReferer": "https://asurascans.com",
+  "search": {
+    "endpoints": ["/browse?search={q}"],
+    "ajaxFallback": false,
+    "listingFallback": false
+  },
+  "color": "#913fe2",
+  "contentRating": "sfw",
+  "language": "en",
+  "enabled": true
+}

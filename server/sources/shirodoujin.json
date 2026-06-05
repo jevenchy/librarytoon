@@ -1,0 +1,15 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "shirodoujin",
+  "baseUrl": "https://shirodoujin.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/series/",
+  "chapterUrl": "/",
+  "proxyImages": true,
+  "imageReferer": "https://shirodoujin.com",
+  "color": "#64748b",
+  "contentRating": "nsfw",
+  "language": "id",
+  "enabled": true
+}
