@@ -42,6 +42,9 @@ export async function apiChapters(cfg: SourceConfig, titleId: string, signal?: A
   const CHAPTERS_DEADLINE_MS = 60_000;
   const outerDeadline = Date.now() + CHAPTERS_DEADLINE_MS * 2;
 
+  let hasReceivedResponse = false;
+  let lastFetchError: unknown;
+
   for (const template of templates) {
     if (Date.now() >= outerDeadline) break;
     if (signal?.aborted) break;
@@ -81,6 +84,7 @@ export async function apiChapters(cfg: SourceConfig, titleId: string, signal?: A
           url,
           getFetchOpts(cfg, "chapters", { params, retries: 1 }, signal)
         );
+        hasReceivedResponse = true;
 
         if (!res || typeof res !== "object") {
           break;
@@ -123,6 +127,10 @@ export async function apiChapters(cfg: SourceConfig, titleId: string, signal?: A
                   break;
                 }
               }
+              if (list.length === 0 && Array.isArray(rootRecord.Season)) {
+                list = (rootRecord.Season as Array<Record<string, unknown>>)
+                  .flatMap(season => Array.isArray(season.Chapter) ? season.Chapter as Record<string, unknown>[] : []);
+              }
             }
           }
         }
@@ -132,7 +140,7 @@ export async function apiChapters(cfg: SourceConfig, titleId: string, signal?: A
         }
 
         const pageChaps = list.map(entry => {
-          if (entry.requiresPurchase === true) return null;
+          if (entry.requiresPurchase === true || (entry.price != null && Number(entry.price) > 0)) return null;
 
           const nested = (entry.data && typeof entry.data === "object" && !Array.isArray(entry.data))
             ? entry.data as Record<string, unknown>
@@ -145,15 +153,18 @@ export async function apiChapters(cfg: SourceConfig, titleId: string, signal?: A
             if (typeof rawUrl !== "string" || !rawUrl.includes("?")) return "";
             try { return new URL(rawUrl).searchParams.get("id") ?? ""; } catch { return ""; }
           })();
-          const rawId = (chUrlId || (compositeId ?? (getField(entry, idKeys) ?? ""))) as string;
-          const id = isNestedCh && rawId && !rawId.includes("/")
-            ? `${seriesPrefix}/${titleId}/${rawId}`
-            : (cfg.chapterIdWithTitle && rawId && !rawId.includes("/")) ? `${titleId}/${rawId}` : rawId;
+          let rawId = (chUrlId || (compositeId ?? (getField(entry, idKeys) ?? ""))) as string;
           if (Number.isNaN(num)) {
             const raw = (nested?.title ?? getField(entry, ttlKeys) ?? "") as string;
             const numMatch = raw.match(chapNumRe) ?? raw.match(/(\d+(?:\.\d+)?)\s*$/);
             if (numMatch) num = Number(numMatch[1]);
           }
+          if (cfg.api?.chapterIdTemplate && rawId && !Number.isNaN(num)) {
+            rawId = cfg.api.chapterIdTemplate.replace("{number}", String(num)).replace("{id}", rawId);
+          }
+          const id = isNestedCh && rawId && !rawId.includes("/")
+            ? `${seriesPrefix}/${titleId}/${rawId}`
+            : (cfg.chapterIdWithTitle && rawId && !rawId.includes("/")) ? `${titleId}/${rawId}` : rawId;
           if (!id || Number.isNaN(num)) return null;
           const title = (nested?.title ?? (getField(entry, ttlKeys) ?? "")) as string;
           const chapterUpdatedAt = ((getField(entry, dtKeys) ?? nested?.updatedAt) as string | undefined) || undefined;
@@ -237,7 +248,12 @@ export async function apiChapters(cfg: SourceConfig, titleId: string, signal?: A
 
         return finalChapters;
       }
-    } catch {}
+    } catch (err) {
+      lastFetchError = err;
+    }
   }
+
+  if (!hasReceivedResponse && lastFetchError !== undefined) throw lastFetchError;
+
   return [];
 }

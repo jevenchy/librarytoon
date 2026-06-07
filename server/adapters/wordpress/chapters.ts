@@ -65,6 +65,7 @@ export async function wordpressChapters(cfg: SourceConfig, titleId: string, sign
   const chapterDepth = derivePattern(cfg.baseUrl, cfg.chapterUrl).prefix.split("/").filter(Boolean).length;
   const isNestedCh   = chapterDepth > seriesDepth;
 
+  let seriesFetchError: unknown;
   try {
     const html = capHtml(await fetchText(
       `${cfg.baseUrl}/${seriesEndpoint(cfg)}/${encodeURIComponent(titleId)}/`,
@@ -102,8 +103,8 @@ export async function wordpressChapters(cfg: SourceConfig, titleId: string, sign
       const cleanText = text.replace(ID_DATE_RE, "").replace(EN_DATE_RE, "").replace(/\s{2,}/g, " ").trim();
       chapters.push({ id, title: cleanText || `Chapter ${num}`, number: num, sourceId: cfg.id, titleId, chapterUpdatedAt });
     });
-  } catch {
-    // Fetching or parsing series HTML failed. Falls back to WordPress REST API if applicable.
+  } catch (err) {
+    seriesFetchError = err;
   }
 
   if (chapters.length > 0) return chapters.sort((chap1, chap2) => chap1.number - chap2.number);
@@ -145,6 +146,8 @@ export async function wordpressChapters(cfg: SourceConfig, titleId: string, sign
       // REST API chapter post type is missing or request failed. Returns empty or partial chapter list.
     }
   }
+
+  if (seriesFetchError !== undefined) throw seriesFetchError;
 
   return chapters.sort((chap1, chap2) => chap1.number - chap2.number);
 }

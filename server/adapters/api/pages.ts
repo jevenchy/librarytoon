@@ -54,9 +54,13 @@ export async function apiPages(cfg: SourceConfig, chapterId: string, signal?: Ab
     );
   }
 
+  let hasReceivedResponse = false;
+  let lastFetchError: unknown;
+
   for (const attempt of attempts) {
     try {
       const res = await attempt() as Record<string, unknown>;
+      hasReceivedResponse = true;
 
       if ((envelope === "retcode" || matchEnvelope(res, envelope)) && res && "retcode" in res) {
         const retcodeEnv = res as { retcode: number; data?: Record<string, unknown> };
@@ -83,7 +87,7 @@ export async function apiPages(cfg: SourceConfig, chapterId: string, signal?: Ab
         if      (Array.isArray(dataData?.images)) images = dataData.images as string[];
         else if (Array.isArray(dataObj?.images))  images = dataObj.images as string[];
         else {
-          const chapterObj = (dataObj?.chapter ?? raw.chapter) as Record<string, unknown> | undefined;
+          const chapterObj = (dataObj?.chapter ?? raw.chapter ?? raw.chapter_data) as Record<string, unknown> | undefined;
           const chapterImages = chapterObj?.images ?? chapterObj?.pages;
           if (Array.isArray(chapterImages)) {
             images = (chapterImages as { url?: string }[]).map(img => img.url ?? (img as unknown as string));
@@ -93,11 +97,17 @@ export async function apiPages(cfg: SourceConfig, chapterId: string, signal?: Ab
 
       if (images.length > 0) {
         return images.map((url, idx) => {
-          const imageUrl = processImageUrl(url.startsWith("http") ? url : `https:${url}`, cfg);
+          const trimmed = url.trim();
+          const imageUrl = processImageUrl(trimmed.startsWith("http") ? trimmed : `https:${trimmed}`, cfg);
           return { chapterId, imageUrl: proxyPageImage(imageUrl, cfg), index: idx };
         });
       }
-    } catch {}
+    } catch (err) {
+      lastFetchError = err;
+    }
   }
+
+  if (!hasReceivedResponse && lastFetchError !== undefined) throw lastFetchError;
+
   return [];
 }
