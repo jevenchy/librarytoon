@@ -1,5 +1,5 @@
 import type { SourceConfig } from "../../../shared/types.js";
-import { proxyCover, processImageUrl } from "../shared.js";
+import { proxyCover, processImageUrl, getField } from "../shared.js";
 
 // Shared helpers alongside re-exports. Operation modules import back from here creating a safe cycle.
 export function apiBase(cfg: SourceConfig): string {
@@ -29,6 +29,28 @@ export function matchEnvelope(res: Record<string, unknown>, want: Envelope): boo
   if (want === "bare")    return Array.isArray(res);
   if (want === "laravel") return "data" in res && "meta" in res;
   return true;
+}
+
+export function applyWpTermMap(
+  cfg: SourceConfig,
+  item: Record<string, unknown>,
+  genres: string[] | undefined,
+  type: string | undefined
+): { genres: string[] | undefined; type: string | undefined } {
+  const wpTermRaw = getField(item, ["_embedded.wp:term"]);
+  if (!cfg.api?.wpTermMap || !Array.isArray(wpTermRaw)) return { genres, type };
+  const allTerms = (wpTermRaw as Array<Array<{ taxonomy: string; name: string }>>).flat();
+  const genreTaxonomy = cfg.api.wpTermMap["genres"];
+  if (genreTaxonomy && !genres?.length) {
+    const extracted = allTerms.filter(term => term.taxonomy === genreTaxonomy).map(term => term.name).filter(Boolean);
+    if (extracted.length) genres = extracted;
+  }
+  const typeTaxonomy = cfg.api.wpTermMap["type"];
+  if (typeTaxonomy) {
+    const typeTerm = allTerms.find(term => term.taxonomy === typeTaxonomy);
+    if (typeTerm) type = typeTerm.name.toLowerCase();
+  }
+  return { genres, type };
 }
 
 export { apiSearch } from "./search.js";

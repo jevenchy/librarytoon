@@ -15,14 +15,22 @@ function escapeCssAttrValue(str: string): string {
 }
 
 export async function htmlChapters(cfg: SourceConfig, titleId: string, signal?: AbortSignal): Promise<Chapter[]> {
-  const url = buildUrl(cfg, cfg.seriesUrl, titleId);
-  const html = capHtml(await fetchText(url, getFetchOpts(cfg, "chapters", { retries: 2 }, signal)));
+  const url = buildUrl(cfg, cfg.seriesUrl, titleId) + (cfg.chapterListAppend ?? "");
+  const rawHtml = await fetchText(url, getFetchOpts(cfg, "chapters", { retries: 2 }, signal));
 
   if (cfg.nextRsc) {
-    const rscChapters = extractNextRscChapters(html, titleId, cfg);
+    const rscChapters = extractNextRscChapters(rawHtml, titleId, cfg);
     if (rscChapters.length > 0) return rscChapters;
   }
 
+  const seriesPrefix = derivePattern(cfg.baseUrl, cfg.seriesUrl).prefix.replace(/^\//, "").replace(/\/$/, "");
+
+  const { chapters: astroChapters, hasAccessibilityData } = extractAstroIslandChapters(rawHtml, titleId, seriesPrefix, cfg);
+  if (astroChapters.length > 0 && hasAccessibilityData) {
+    return astroChapters.sort((chap1, chap2) => chap1.number - chap2.number);
+  }
+
+  const html = cfg.chapterListAppend ? rawHtml : capHtml(rawHtml);
   const $ = await loadHtml(html);
   const chapters: Chapter[] = [];
 
@@ -52,7 +60,7 @@ export async function htmlChapters(cfg: SourceConfig, titleId: string, signal?: 
     const anchor = (el as { tagName?: string }).tagName === "a"
       ? $(el)
       : $(el).find(chapterLinkSel).first();
-    const href = anchor.attr("href") ?? "";
+    const href = anchor.attr("href") ?? (cfg.selectors?.chapterHrefAttr ? ($(el).attr(cfg.selectors.chapterHrefAttr) ?? "") : "");
     if (!href) return;
     const lockedSel = cfg.selectors?.chapterItemLocked;
     if (lockedSel && ($(el).find(lockedSel).length > 0 || $(el).is(lockedSel))) return;
@@ -70,16 +78,20 @@ export async function htmlChapters(cfg: SourceConfig, titleId: string, signal?: 
     const numMatch =
       text.match(chapNumRe) ??
       text.match(/(\d+(?:\.\d+)?)\s*$/);
-    const num = numMatch ? Number(numMatch[1]) : NaN;
+    let num = numMatch ? Number(numMatch[1]) : NaN;
+    if (Number.isNaN(num)) {
+      const slugNumMatch = chSlug.match(/(\d+(?:\.\d+)?)\s*$/);
+      if (slugNumMatch) num = Number(slugNumMatch[1]);
+    }
     if (!id || Number.isNaN(num)) return;
     const $dateEl = $(el).find(chapterDateSel).first();
     const rawDate =
+      (cfg.selectors?.chapterDateAttr ? ($dateEl.attr(cfg.selectors.chapterDateAttr) ?? anchor.attr(cfg.selectors.chapterDateAttr) ?? $(el).attr(cfg.selectors.chapterDateAttr) ?? "") : "") ||
       $dateEl.text().trim() ||
       $dateEl.attr("title")?.trim() ||
       $dateEl.find("a[title]").first().attr("title")?.trim() ||
       $(el).find("p.small,p.font-italic,.release-date").first().text().trim() ||
       $(el).find("[data-date]").attr("data-date") ||
-      (cfg.selectors?.chapterDateAttr ? (anchor.attr(cfg.selectors.chapterDateAttr) ?? "") : "") ||
       $(el).find("abbr[title],span[title],i[title]").first().attr("title")?.trim() ||
       $(el).find("time").attr("datetime") ||
       (ID_DATE_DMY_RE.exec(text) ?? [])[0] ||
@@ -101,9 +113,7 @@ export async function htmlChapters(cfg: SourceConfig, titleId: string, signal?: 
     chapters.push({ id, title: cleanText || `Chapter ${num}`, number: num, sourceId: cfg.id, titleId, chapterUpdatedAt });
   });
 
-  const seriesPrefix = derivePattern(cfg.baseUrl, cfg.seriesUrl).prefix.replace(/^\//, "").replace(/\/$/, "");
-  const { chapters: astroChapters, hasAccessibilityData } = extractAstroIslandChapters(html, titleId, seriesPrefix, cfg);
-  if (astroChapters.length > 0 && (astroChapters.length > chapters.length || hasAccessibilityData)) {
+  if (astroChapters.length > 0 && astroChapters.length > chapters.length) {
     return astroChapters.sort((chap1, chap2) => chap1.number - chap2.number);
   }
 

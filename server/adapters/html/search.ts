@@ -4,7 +4,7 @@ import { LOGGER } from "../../utils/logger.js";
 import {
   slug, fixUrl, getFetchOpts, derivePattern, resolveUrl, cleanTitle, proxyCover, processImageUrl
 } from "../shared.js";
-import { loadHtml, buildChapterNumRe, RESERVED_SLUGS } from "./index.js";
+import { loadHtml, buildChapterNumRe, RESERVED_SLUGS, decodeNextRscStream } from "./index.js";
 
 const DEFAULT_SEARCH_ITEM =
   ".bsx,.bs,.bge,.item,.manga-item,.comic-item,article.post,.list-update_item" +
@@ -59,6 +59,9 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
     }
   }
 
+  const norm = (str: string) => str.toLowerCase().normalize("NFKD").replace(/[‘’`´‚‛]/g, "'");
+  const normalizedQuery = norm(query);
+
   const sel = cfg.selectors;
   const searchItemSel  = sel?.searchItem  ?? DEFAULT_SEARCH_ITEM;
   const searchTitleSel = sel?.searchTitle ?? DEFAULT_SEARCH_TITLE;
@@ -97,7 +100,10 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
         const latestChapter = chMatch ? Number(chMatch[1]) : undefined;
         if (id && !RESERVED_SLUGS.has(id) && title && !seenIds.has(id)) {
           seenIds.add(id);
-          results.push({ id, title, cover, latestChapter, sourceId: cfg.id });
+          results.push({
+            id, title, cover, latestChapter, sourceId: cfg.id,
+            type: sel?.seriesType ? $(el).find(sel.seriesType).first().text().trim() || undefined : undefined,
+          });
         }
       });
 
@@ -112,10 +118,11 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
             $(el).find("[class*='title'],h3,h2").first().text().trim() ||
             $(el).attr("title") || $(el).text().trim();
           const title = cleanTitle(rawTitle, cfg);
+          if (!title || !norm(title).includes(normalizedQuery)) return;
           const imgEl = $(el).find("img").first();
           const rawSrc = imgEl.attr("data-src") ?? imgEl.attr("src") ?? "";
           const cover = proxyCover(fixUrl(processImageUrl(rawSrc, cfg), cfg.baseUrl, cfg), cfg);
-          if (id && !RESERVED_SLUGS.has(id) && title && !seenIds.has(id)) {
+          if (id && !RESERVED_SLUGS.has(id) && !seenIds.has(id)) {
             seenIds.add(id);
             results.push({ id, title, cover, sourceId: cfg.id });
           }
@@ -134,13 +141,15 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
   };
 
   let urlResults: SearchResult[] = [];
-  for (const url of urls) {
-    if (signal?.aborted) break;
-    try {
-      const found = await tryUrl(url);
-      if (found.length > 0) { urlResults = found; break; }
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException)?.code === "EACCES") break;
+  if (!cfg.nextRsc || cfg.search?.endpoints?.length) {
+    for (const url of urls) {
+      if (signal?.aborted) break;
+      try {
+        const found = await tryUrl(url);
+        if (found.length > 0) { urlResults = found; break; }
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException)?.code === "EACCES") break;
+      }
     }
   }
   if (urlResults.length > 0) return urlResults;
@@ -179,9 +188,32 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
     for (const listingUrl of listingUrls) {
       try {
         const listHtml = await fetchText(listingUrl, getFetchOpts(cfg, "search", { retries: 1 }, signal));
+
+        if (cfg.nextRsc) {
+          const decoded = decodeNextRscStream(listHtml);
+          const rscResults: SearchResult[] = [];
+          const seenRscIds = new Set<string>();
+          const slugRe = /"slug":"([^"]+)"/g;
+          let slugMatch: RegExpExecArray | null;
+          while ((slugMatch = slugRe.exec(decoded)) !== null) {
+            const id = slugMatch[1];
+            if (!id || seenRscIds.has(id) || RESERVED_SLUGS.has(id)) continue;
+            const preCtx = decoded.slice(Math.max(0, slugMatch.index - 200), slugMatch.index);
+            const nameMatches = [...preCtx.matchAll(/"(?:name|title)":"([^"]+)"/g)];
+            const titleMatch = nameMatches[nameMatches.length - 1];
+            if (!titleMatch?.[1]) continue;
+            const title = cleanTitle(titleMatch[1], cfg);
+            if (!title) continue;
+            const postCtx = decoded.slice(slugMatch.index, slugMatch.index + 300);
+            const coverMatch = postCtx.match(/"(?:urlImg|coverImage|cover|image|thumbnail)":"([^"]+)"/);
+            const cover = proxyCover(fixUrl(processImageUrl(coverMatch?.[1] ?? "", cfg), cfg.baseUrl, cfg), cfg);
+            seenRscIds.add(id);
+            rscResults.push({ id, title, cover, sourceId: cfg.id });
+          }
+          if (rscResults.length > 0) return rscResults;
+        }
+
         const $l = await loadHtml(listHtml);
-        const norm = (str: string) => str.toLowerCase().normalize("NFKD").replace(/[‘’`´‚‛]/g, "'");
-        const normalizedQuery = norm(query);
         const listResults: SearchResult[] = [];
         const seenListIds = new Set<string>();
         $l(`a[href*="/${pathPart.replace(/["[\]\\]/g, "\\$&")}/"]`).each((_slot, el) => {
@@ -206,7 +238,10 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
           const cover = proxyCover(fixUrl(processImageUrl(rawSrc, cfg), cfg.baseUrl, cfg), cfg);
           if (id && !seenListIds.has(id)) {
             seenListIds.add(id);
-            listResults.push({ id, title, cover, sourceId: cfg.id });
+            listResults.push({
+              id, title, cover, sourceId: cfg.id,
+              type: sel?.seriesType ? searchRoot.find(sel.seriesType).first().text().trim() || undefined : undefined,
+            });
           }
         });
         if (listResults.length > 0) return listResults;

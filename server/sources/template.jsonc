@@ -23,6 +23,7 @@
     "chapterTitle":              ".chapternum",                // chapter title/number text inside a row
     "chapterDate":               ".chapterdate",
     "chapterDateAttr":           "datetime",                   // attribute holding the chapter date (e.g. <time datetime>)
+    "chapterHrefAttr":           "data-href",                  // attribute holding the chapter href when the item is not an <a>
     "chapterItemLocked":         ".locked",                    // marks a locked/paid chapter row to skip
     "pageImage":                 "#readerarea img",
     "imageAttr":                 "data-src",                   // attribute holding the real image URL
@@ -46,17 +47,19 @@
   //    "cursorField": "",                           // response field holding the next cursor (pagination: cursor)
   //    "totalPagesField": "totalPages",             // response field with total page count (pagination: page)
   //    "slugSuffix": "",                            // appended to the slug when building endpoint URLs
+  //    "chapterIdTemplate": "chapter-{number}.{id}", // template for building chapter IDs from number and raw id
   //    "searchEndpoints":    ["{base}/search?q={q}"],
   //    "titleInfoEndpoints": ["/series/{titleId}"], // configurable title-info endpoint(s), {titleId} substituted
   //    "chapterEndpoints":   ["/manga/{titleId}/chapters"],
   //    "pageEndpoints":      ["/chapter/{chapterId}"],
   //    "fieldMap": {                                // search/title-info fields -> result (first present key wins)
-  //      "id":      ["slug", "id"],
-  //      "title":   ["title"],
-  //      "cover":   ["cover_image_url", "coverImage"],
-  //      "chapter": ["latest_chapter_number"],
-  //      "type":    ["seriesType"],
-  //      "genres":  ["genres"]
+  //      "id":               ["slug", "id"],
+  //      "title":            ["title"],
+  //      "cover":            ["cover_image_url", "coverImage"],
+  //      "chapter":          ["latest_chapter_number"],
+  //      "type":             ["seriesType"],
+  //      "genres":           ["genres"],
+  //      "alternativeTitle": ["alternative_title"]
   //    },
   //    "chapterFieldMap": {                         // chapter-list response fields -> Chapter
   //      "id":     ["slug"],
@@ -64,7 +67,11 @@
   //      "title":  ["title"],
   //      "date":   ["createdAt"]
   //    },
-  //    "pageFieldMap": { "images": ["images"] }     // response field holding the page-image array
+  //    "pageFieldMap": { "images": ["images"] },    // response field holding the page-image array
+  //    "wpTermMap": {                               // maps adapter field names to WP taxonomy slugs (wp:term)
+  //      "genres": "genre",
+  //      "type":   "type"
+  //    }
   //  },
 
   // wordpress
@@ -125,6 +132,7 @@
   // "chaptersAscending": false,
   // "chapterDeduplicate": true,
   // "chapterBatchSize": 100,
+  // "chapterListAppend": "?all=1&page=1", // query string appended to series URL when fetching chapter list
   // "nestedChapterIds": false,
   // "chapterIdWithTitle": false, // prefix chapter IDs with "{titleId}/"
 
@@ -132,6 +140,6 @@
 
   "color": "#0000",       // hex badge color shown in the UI
   "contentRating": "sfw", // sfw | nsfw
-  "language": "id",       // ISO 639-1 code, default "id"
+  "language": "id",       // id | en
   "enabled": false        // set true only after manual testing
 }

@@ -32,6 +32,7 @@ const apiFieldMapSchema = z.object({
   chapter: z.array(z.string()).optional(),
   type: z.array(z.string()).optional(),
   genres: z.array(z.string()).optional(),
+  alternativeTitle: z.array(z.string()).optional(),
 }).optional();
 
 const apiChapterFieldMapSchema = z.object({
@@ -73,6 +74,8 @@ export const apiConfigSchema = z.object({
   fieldMap: apiFieldMapSchema,
   chapterFieldMap: apiChapterFieldMapSchema,
   pageFieldMap: apiPageFieldMapSchema,
+  chapterIdTemplate: z.string().optional(),
+  wpTermMap: z.record(z.string()).optional(),
 }).strict();
 
 export const searchConfigSchema = z.object({

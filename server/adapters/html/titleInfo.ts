@@ -14,6 +14,7 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
       : `${cfg.baseUrl}/manga/${titleId}/`;
     const html = capHtml(await fetchText(url, getFetchOpts(cfg, "search", { retries: 2 })));
     const $ = await loadHtml(html);
+    const rsc = cfg.nextRsc ? extractNextRscSeriesInfo(html) : {} as ReturnType<typeof extractNextRscSeriesInfo>;
     const seriesPrefix = derivePattern(cfg.baseUrl, cfg.seriesUrl).prefix.replace(/^\//, "").replace(/\/$/, "");
     const { chapters: astroChaps } = extractAstroIslandChapters(html, titleId, seriesPrefix, cfg);
     const rawOgTitle = $("meta[property='og:title']").attr("content") || "";
@@ -29,20 +30,36 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
     const coverSelCfg = cfg.selectors?.seriesCover ?? ".series-thumb img,.komik_info-cover img,.thumb img,.cover img";
     const coverEl = $(coverSelCfg).first();
     let ldCover = "";
+    let ldGenres: string[] = [];
+    let ldSeriesUpdatedAt = "";
     $('script[type="application/ld+json"]').each((_slot, el) => {
-      if (ldCover) return;
       try {
-        const ld = JSON.parse($(el).html() ?? "");
-        const img = ld.image ?? ld.thumbnailUrl;
-        if (img && typeof img === "string") ldCover = img;
-      } catch {
-        // JSON-LD parsing failed, likely due to malformed or invalid structured metadata. Ignore and proceed.
-      }
+        const ld = JSON.parse($(el).html() ?? "") as Record<string, unknown>;
+        const ldItems: Record<string, unknown>[] = Array.isArray(ld["@graph"])
+          ? ld["@graph"] as Record<string, unknown>[]
+          : [ld];
+        for (const ldItem of ldItems) {
+          if (!ldCover) {
+            const img = ldItem.image ?? ldItem.thumbnailUrl;
+            if (typeof img === "string") ldCover = img;
+          }
+          if (!ldGenres.length) {
+            const genre = ldItem.genre;
+            if (typeof genre === "string") ldGenres = [genre];
+            else if (Array.isArray(genre)) ldGenres = (genre as unknown[]).filter((g): g is string => typeof g === "string");
+          }
+          if (!ldSeriesUpdatedAt && Array.isArray(ldItem.hasPart)) {
+            const partWithDate = (ldItem.hasPart as Record<string, unknown>[]).find(part => typeof part.dateModified === "string");
+            if (partWithDate) ldSeriesUpdatedAt = partWithDate.dateModified as string;
+          }
+        }
+      } catch {}
     });
     const astroCoverKey = cfg.selectors?.seriesCoverAstroKey;
     const astroCoverRaw = astroCoverKey ? extractAstroStringProp(html, astroCoverKey) : "";
     const cover = proxyCover(fixUrl(
       processImageUrl(
+        rsc.cover ||
         astroCoverRaw ||
         coverEl.attr("data-src") || coverEl.attr("src") ||
         ldCover ||
@@ -68,7 +85,9 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
 
     const chapNumRe = buildChapterNumRe(cfg);
     const chNums: number[] = [];
-    $("#Daftar_Chapter tr,#chapter_list li,.cl li,.eph-num,.series-chapterlist li,a.list-chapter").each((_slot, el) => {
+    const chapListSel = "#Daftar_Chapter tr,#chapter_list li,.cl li,.eph-num,.series-chapterlist li,a.list-chapter"
+      + (cfg.selectors?.chapterItem ? `,${cfg.selectors.chapterItem}` : "");
+    $(chapListSel).each((_slot, el) => {
       const text = $(el).find("span,a").first().text().trim() || $(el).find("a").first().text().trim() || $(el).text().trim();
       const numMatch = text.match(chapNumRe) ?? text.match(/(\d+(?:\.\d+)?)\s*$/);
       if (numMatch) { const num = Number(numMatch[1]); if (!Number.isNaN(num)) chNums.push(num); }
@@ -101,6 +120,9 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
     }
     if (!genres.length) {
       for (const genre of extractAstroGenres(html)) pushGenre(genre);
+    }
+    if (!genres.length) {
+      for (const genre of ldGenres) pushGenre(genre);
     }
 
     let type: string | undefined;
@@ -161,16 +183,13 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
       const raw = extractAstroStringProp(html, cfg.selectors.seriesAltTitleAstroKey);
       if (raw) alternativeTitle = raw.replace(/\n+/g, ", ").replace(/\s*,\s*/g, ", ").trim() || undefined;
     }
-    // RSC sources keep series metadata in the stream. Fill fields the selector path left empty.
     let rscSeriesUpdatedAt: string | undefined;
     if (cfg.nextRsc) {
-      const rsc = extractNextRscSeriesInfo(html);
       if (!type) type = rsc.type;
       if (!alternativeTitle) alternativeTitle = rsc.alternativeTitle;
       if (!genres.length && rsc.genres) genres.push(...rsc.genres);
       if (rsc.description && rsc.description.length > (description?.length ?? 0)) description = rsc.description;
       rscSeriesUpdatedAt = rsc.seriesUpdatedAt;
-      // RSC carries the chapter list, so derive latestChapter from it without a separate fetch.
       if (latestChapter === undefined) {
         const rscChapters = extractNextRscChapters(html, titleId, cfg);
         if (rscChapters.length > 0) latestChapter = Math.max(...rscChapters.map(chap => chap.number));
@@ -185,6 +204,7 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
       $("time[itemprop='datePublished']").attr("datetime")?.trim() ||
       $("time[datetime]").first().attr("datetime")?.trim() ||
       rscSeriesUpdatedAt ||
+      ldSeriesUpdatedAt ||
       undefined;
 
     if (latestChapter === undefined || !seriesUpdatedAt) {
@@ -215,6 +235,7 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
           $(el).find("p.small,p.font-italic,.release-date").first().text().trim() ||
           $(el).attr("data-date") ||
           $(el).find("[data-date]").attr("data-date") ||
+          (cfg.selectors?.chapterDateAttr ? $(el).attr(cfg.selectors.chapterDateAttr) : undefined) ||
           $(el).find("abbr[title],span[title],i[title]").first().attr("title")?.trim() ||
           $(el).find("time").attr("datetime") ||
           $(el).attr("datetime") || "";
@@ -240,17 +261,18 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
   }
 }
 
-// For RSC sources, series metadata lives in the stream not the DOM. Scope scan before "chapters" array.
-export function extractNextRscSeriesInfo(html: string): { alternativeTitle?: string; type?: string; genres?: string[]; description?: string; seriesUpdatedAt?: string } {
+export function extractNextRscSeriesInfo(html: string): { alternativeTitle?: string; type?: string; genres?: string[]; description?: string; seriesUpdatedAt?: string; cover?: string } {
   const decoded = decodeNextRscStream(html);
-  const start = decoded.indexOf('"series":{');
+  let start = decoded.indexOf('"series":{');
+  if (start === -1) start = decoded.indexOf('"serie":{');
   if (start === -1) return {};
   const chaptersAt = decoded.indexOf('"chapters":[', start);
   const scope = decoded.slice(start, chaptersAt === -1 ? start + 6000 : chaptersAt);
 
-  const alternativeTitle = scope.match(/"altTitle":"([^"]*)"/)?.[1]?.trim() || undefined;
+  const altRaw = scope.match(/"altTitle":"([^"]*)"/)?.[1]?.trim()
+    ?? scope.match(/"alternativeName":"([^"]*)"/)?.[1]?.trim();
+  const alternativeTitle = altRaw || undefined;
 
-  // Source enums are all-caps (MANHWA/MANGA/MANHUA). Present them title-cased for the UI.
   const rawType = scope.match(/"type":"([^"]+)"/)?.[1];
   const type = rawType ? rawType.charAt(0) + rawType.slice(1).toLowerCase() : undefined;
 
@@ -261,19 +283,31 @@ export function extractNextRscSeriesInfo(html: string): { alternativeTitle?: str
       if (!genres.includes(genreMatch[1])) genres.push(genreMatch[1]);
     }
   }
-
-  // After decodeNextRscStream, inner quotes are \" (one layer). Use JSON.parse to get the plain string.
-  let description: string | undefined;
-  const descMatch = scope.match(/"description":"((?:[^"\\]|\\.)*)"/);
-  if (descMatch?.[1]) {
-    try { description = (JSON.parse(`"${descMatch[1]}"`) as string).trim() || undefined; }
-    catch { description = descMatch[1].replace(/\\"/g, '"').replace(/\\n/g, " ").trim() || undefined; }
+  if (!genres.length) {
+    const extStart = chaptersAt === -1 ? start : chaptersAt;
+    const gendersBlock = decoded.slice(extStart, extStart + 8000).match(/"genders":\[([^\]]*)\]/)?.[1];
+    if (gendersBlock) {
+      for (const genderMatch of gendersBlock.matchAll(/"name":"([^"]+)"/g)) {
+        if (!genres.includes(genderMatch[1])) genres.push(genderMatch[1]);
+      }
+    }
   }
 
-  // The series updatedAt precedes the chapters array in scope, so it cannot match a chapter timestamp.
-  const seriesUpdatedAt = scope.match(/"updatedAt":"([^"]+)"/)?.[1] || undefined;
+  let description: string | undefined;
+  const rawDesc = (scope.match(/"description":"((?:[^"\\]|\\.)*)"/)?.[1]
+    ?? scope.match(/"sinopsis":"((?:[^"\\]|\\.)*)"/)?.[1]);
+  if (rawDesc) {
+    try { description = (JSON.parse(`"${rawDesc}"`) as string).trim() || undefined; }
+    catch { description = rawDesc.replace(/\\"/g, '"').replace(/\\n/g, " ").trim() || undefined; }
+  }
 
-  return { alternativeTitle, type, genres: genres.length ? genres : undefined, description, seriesUpdatedAt };
+  const seriesUpdatedAt = scope.match(/"updatedAt":"([^"]+)"/)?.[1]
+    ?? scope.match(/"actualizacionCap":"([^"]+)"/)?.[1]
+    ?? undefined;
+
+  const cover = scope.match(/"urlImg":"([^"]+)"/)?.[1] || undefined;
+
+  return { alternativeTitle, type, genres: genres.length ? genres : undefined, description, seriesUpdatedAt, cover };
 }
 
 export function extractAstroStringProp(html: string, propKey: string): string {
@@ -286,6 +320,11 @@ export function extractAstroStringProp(html: string, propKey: string): string {
     const decoded = match[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&#34;/g, '"');
     const propMatch = propRe.exec(decoded);
     if (propMatch && propMatch[1].length > best.length) best = propMatch[1];
+  }
+  // Fallback when capHtml truncates the props attribute before its closing quote.
+  if (!best) {
+    const encodedPropMatch = new RegExp(`&quot;${escapedKey}&quot;:\\[0,&quot;((?:[^&]|&(?!quot;))+)&quot;`).exec(html);
+    if (encodedPropMatch && encodedPropMatch[1].length >= 10) best = encodedPropMatch[1];
   }
   if (!best) return "";
   const decodedContent = best

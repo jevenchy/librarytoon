@@ -102,10 +102,30 @@ export function extractNextRscPages(html: string, chapterId: string, cfg: Source
     seen.add(pageNum);
     found.push({ pageNum, url: match[2] });
   }
-  found.sort((page1, page2) => page1.pageNum - page2.pageNum);
-  return found.map((page, idx) => ({
+  if (found.length > 0) {
+    found.sort((page1, page2) => page1.pageNum - page2.pageNum);
+    return found.map((page, idx) => ({
+      chapterId,
+      imageUrl: proxyPageImage(fixUrl(processImageUrl(page.url, cfg), cfg.baseUrl, cfg), cfg),
+      index: idx,
+    }));
+  }
+
+  const extRe = imageExtRe(cfg);
+  const arrRe = /\["(https?:\/\/[^"]+)"[^\]]*\]/g;
+  let bestUrls: string[] = [];
+  while ((match = arrRe.exec(decoded)) !== null) {
+    const imgUrls: string[] = [];
+    const itemRe = /"(https?:\/\/[^"]+)"/g;
+    let itemMatch: RegExpExecArray | null;
+    while ((itemMatch = itemRe.exec(match[0])) !== null) {
+      if (itemMatch[1].match(extRe) && !isExcludedImage(itemMatch[1], cfg)) imgUrls.push(itemMatch[1]);
+    }
+    if (imgUrls.length > bestUrls.length) bestUrls = imgUrls;
+  }
+  return bestUrls.map((imageUrl, idx) => ({
     chapterId,
-    imageUrl: proxyPageImage(fixUrl(processImageUrl(page.url, cfg), cfg.baseUrl, cfg), cfg),
+    imageUrl: proxyPageImage(fixUrl(processImageUrl(imageUrl, cfg), cfg.baseUrl, cfg), cfg),
     index: idx,
   }));
 }

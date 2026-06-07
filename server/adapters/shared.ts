@@ -176,15 +176,17 @@ export function proxyCover(url: string, cfg: SourceConfig): string {
   if (!url) return url;
   const optimized = applyCoverOptimizer(url, cfg);
   if (!cfg.proxyImages || /\.gif(\?|$)/i.test(optimized)) return toHttps(optimized);
+  const httpsUrl = toHttps(optimized);
   const ref = cfg.imageReferer ? `&ref=${encodeURIComponent(cfg.imageReferer)}` : "";
-  return `/api/img?url=${encodeURIComponent(optimized)}${ref}&sig=${signImageUrl(optimized)}`;
+  return `/api/img?url=${encodeURIComponent(httpsUrl)}${ref}&sig=${signImageUrl(httpsUrl)}`;
 }
 
 export function proxyPageImage(url: string, cfg: SourceConfig): string {
   if (!url) return url;
   if (!cfg.proxyImages) return toHttps(url);
+  const httpsUrl = toHttps(url);
   const ref = cfg.imageReferer ? `&ref=${encodeURIComponent(cfg.imageReferer)}` : "";
-  return `/api/img?url=${encodeURIComponent(url)}${ref}&sig=${signImageUrl(url)}`;
+  return `/api/img?url=${encodeURIComponent(httpsUrl)}${ref}&sig=${signImageUrl(httpsUrl)}`;
 }
 
 const NAMED_ENTITIES: Record<string, string> = {
@@ -247,7 +249,8 @@ export function extractDesc(
 ): string | undefined {
   const raw = (
     nested?.synopsis ?? nested?.description ?? nested?.sinopsis ?? nested?.summary ??
-    item.synopsis    ?? item.description    ?? item.sinopsis    ?? item.summary
+    item.synopsis    ?? item.description    ?? item.sinopsis    ?? item.summary ??
+    (item.excerpt as Record<string, unknown> | undefined)?.rendered
   ) as string | undefined;
   if (!raw) return undefined;
   return fixMojibake(htmlToText(raw)) || undefined;
@@ -259,7 +262,12 @@ export function toRecord(value: unknown): Record<string, unknown> {
 
 export function getField(item: Record<string, unknown>, keys: string[]): unknown {
   for (const key of keys) {
-    if (key in item && item[key] != null && item[key] !== "") return item[key];
+    if (key.includes(".")) {
+      const pathVal = getPath(item, key);
+      if (pathVal != null && pathVal !== "") return pathVal;
+    } else if (key in item && item[key] != null && item[key] !== "") {
+      return item[key];
+    }
   }
   return undefined;
 }
@@ -285,7 +293,7 @@ export const ID_DATE_DMY_RE = /\b(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|J
 export const EN_DATE_RE = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})\b/i;
 export const DMY_DATE_RE = /\b\d{1,2}\/\d{1,2}\/\d{4}\b/;
 
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:T[\d:.]+Z?)?$/;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:T[\d:.]+(?:Z|[+-]\d{2}:\d{2})?)?$/;
 
 const EN_MON_NUM: Record<string, string> = {
   jan:"01", feb:"02", mar:"03", apr:"04", may:"05", jun:"06",

@@ -65,23 +65,26 @@ export function extractAstroIslandChapters(
     decoded.includes('"is_premium":[0,');
   const chapters: Chapter[] = [];
   const seen = new Set<number>();
-  const re = /"number":\[0,(\d+(?:\.\d+)?)\][^}]*?"slug":\[0,"([^"]+)"[^}]*?"(?:createdAt|created_at|published_at)":\[0,"([^"]+)"/g;
-  const matches: RegExpExecArray[] = [];
-  while ((match = re.exec(decoded)) !== null) matches.push(match);
-  for (let idx = 0; idx < matches.length; idx++) {
-    const chapterMatch = matches[idx];
-    const num = Number(chapterMatch[1]);
-    const chapterSlug = chapterMatch[2];
-    const createdAt = chapterMatch[3];
-    if (Number.isNaN(num) || !chapterSlug || seen.has(num)) continue;
+  const numRe = /"number":\[0,(\d+(?:\.\d+)?)\]/g;
+  const numMatches: RegExpExecArray[] = [];
+  while ((match = numRe.exec(decoded)) !== null) numMatches.push(match);
+  for (let idx = 0; idx < numMatches.length; idx++) {
+    const numMatch = numMatches[idx];
+    const num = Number(numMatch[1]);
+    if (Number.isNaN(num) || seen.has(num)) continue;
+    // Bound scope to this chapter so fields from the next chapter do not bleed in.
+    const scopeEnd = idx + 1 < numMatches.length ? numMatches[idx + 1].index : numMatch.index + 800;
+    const scope = decoded.slice(numMatch.index, scopeEnd);
+    const slugMatch = scope.match(/"slug":\[0,"([^"]+)"\]/);
+    const dateMatch = scope.match(/"(?:createdAt|created_at|published_at)":\[0,"([^"]+)"\]/);
+    if (!slugMatch || !dateMatch) continue;
+    const chapterSlug = slugMatch[1];
+    const createdAt = dateMatch[1];
 
     if (hasAccessibilityData) {
-      // Bound context to this chapter object so a later locked chapter does not bleed into the window.
-      const end = idx + 1 < matches.length ? matches[idx + 1].index : chapterMatch.index + 600;
-      const contextSlice = decoded.slice(chapterMatch.index, end);
-      const accessMatch    = contextSlice.match(/"isAccessible":\[0,(true|false)\]/);
-      const isLockedMatch  = contextSlice.match(/"is_locked":\[0,(true|false)\]/);
-      const isPremiumMatch = contextSlice.match(/"is_premium":\[0,(true|false)\]/);
+      const accessMatch    = scope.match(/"isAccessible":\[0,(true|false)\]/);
+      const isLockedMatch  = scope.match(/"is_locked":\[0,(true|false)\]/);
+      const isPremiumMatch = scope.match(/"is_premium":\[0,(true|false)\]/);
       if (accessMatch?.[1]    === "false") continue;
       if (isLockedMatch?.[1]  === "true")  continue;
       if (isPremiumMatch?.[1] === "true")  continue;
@@ -123,6 +126,38 @@ export function extractNextRscChapters(html: string, titleId: string, cfg: Sourc
       chapterUpdatedAt: pubMatch?.[1] || undefined,
     });
   }
+  if (chapters.length === 0) {
+    const chapArrStart = decoded.indexOf('"chapters":[');
+    if (chapArrStart !== -1) {
+      const searchWindow = decoded.slice(chapArrStart, chapArrStart + 100_000);
+      const numRe = /"num":(\d+(?:\.\d+)?)/g;
+      const numMatches: RegExpExecArray[] = [];
+      let numExec: RegExpExecArray | null;
+      while ((numExec = numRe.exec(searchWindow)) !== null) numMatches.push(numExec);
+      const basePrefix = chapterPrefix.split("/").slice(0, -1).join("/");
+      for (let idx = 0; idx < numMatches.length; idx++) {
+        const numMatch = numMatches[idx];
+        const num = Number(numMatch[1]);
+        if (Number.isNaN(num) || seen.has(num)) continue;
+        const ctxEnd = idx + 1 < numMatches.length ? numMatches[idx + 1].index : numMatch.index + 600;
+        const ctx = searchWindow.slice(numMatch.index, ctxEnd);
+        const chapSlugMatch = ctx.match(/"slug":"([^"]+)"/);
+        if (!chapSlugMatch?.[1]) continue;
+        const createdMatch = ctx.match(/"createdAt":"([^"]+)"/);
+        const chapSlug = chapSlugMatch[1];
+        seen.add(num);
+        chapters.push({
+          id: cfg.nestedChapterIds ? `${basePrefix}/${chapSlug}` : chapSlug,
+          title: `Chapter ${num}`,
+          number: num,
+          sourceId: cfg.id,
+          titleId,
+          chapterUpdatedAt: createdMatch?.[1] || undefined,
+        });
+      }
+    }
+  }
+
   return chapters.sort((chap1, chap2) => chap1.number - chap2.number);
 }
 
@@ -136,6 +171,19 @@ export function extractAstroGenres(html: string): string[] {
     const nameRe = /"name":\[0,"([^"]+)"/g;
     const genresIdx = decoded.indexOf('"genres"');
     const afterGenres = decoded.slice(genresIdx, genresIdx + 4000);
+    let nameMatch: RegExpExecArray | null;
+    while ((nameMatch = nameRe.exec(afterGenres)) !== null) {
+      if (!genres.includes(nameMatch[1])) genres.push(nameMatch[1]);
+    }
+    if (genres.length > 0) return genres;
+  }
+  // Fallback when capHtml truncates the props attribute before its closing quote.
+  const genresIdx = html.indexOf('&quot;genres&quot;');
+  if (genresIdx !== -1) {
+    const afterGenres = html.slice(genresIdx, genresIdx + 4000)
+      .replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#34;/g, '"');
+    const genres: string[] = [];
+    const nameRe = /"name":\[0,"([^"]+)"/g;
     let nameMatch: RegExpExecArray | null;
     while ((nameMatch = nameRe.exec(afterGenres)) !== null) {
       if (!genres.includes(nameMatch[1])) genres.push(nameMatch[1]);

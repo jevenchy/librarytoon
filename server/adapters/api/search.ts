@@ -1,7 +1,7 @@
 import type { SearchResult, SourceConfig } from "../../../shared/types.js";
 import { fetchJson } from "../../services/fetchService.js";
 import { getFetchOpts, extractDesc, getField } from "../shared.js";
-import { apiBase, apiCover, dedupTitle, matchEnvelope } from "./index.js";
+import { apiBase, apiCover, dedupTitle, matchEnvelope, applyWpTermMap } from "./index.js";
 
 export async function apiSearch(cfg: SourceConfig, query: string, signal?: AbortSignal): Promise<SearchResult[]> {
   const base = apiBase(cfg);
@@ -91,7 +91,7 @@ export async function apiSearch(cfg: SourceConfig, query: string, signal?: Abort
         }
       }
 
-      const rawList = Array.isArray(res) ? res : (res.data ?? res.comics ?? res.results ?? res.posts);
+      const rawList = Array.isArray(res) ? res : (res.data ?? res.comics ?? res.results ?? res.posts ?? res.projects);
       const list: Record<string, unknown>[] = Array.isArray(rawList) ? rawList as Record<string, unknown>[] : [];
 
       if (list.length > 0) {
@@ -109,14 +109,17 @@ export async function apiSearch(cfg: SourceConfig, query: string, signal?: Abort
           const title = dedupTitle(rawTitle);
           const cover = apiCover((nested?.coverImage ?? nested?.cover_image_url ?? nested?.cover ?? (getField(item, coverKeys) ?? "")) as string, cfg);
           const rawCh = nested?.totalChapters ?? nested?.latestChapter ?? getField(item, chapKeys);
-          const latestChapter = rawCh != null && !Number.isNaN(Number(rawCh)) ? Number(rawCh) : undefined;
-          const type = ((nested?.type ?? getField(item, typeKeys)) as string | undefined)?.toLowerCase() || undefined;
-          const seriesUpdatedAt = ((nested?.lastUpdated ?? item.lastUpdated ?? nested?.lastChapterAddedAt ?? item.lastChapterAddedAt ?? nested?.updatedAt ?? item.updatedAt) as string | undefined) || undefined;
+          const chNum = Array.isArray(rawCh) && rawCh.length > 0 ? (rawCh[0] as Record<string, unknown>)?.number : undefined;
+          const latestChapter = chNum != null && !Number.isNaN(Number(chNum)) ? Number(chNum)
+            : rawCh != null && !Number.isNaN(Number(rawCh)) ? Number(rawCh) : undefined;
+          let type = ((nested?.type ?? getField(item, typeKeys)) as string | undefined)?.toLowerCase().replace(/\s*\+\s*\d+/g, "").trim() || undefined;
+          const seriesUpdatedAt = ((nested?.lastUpdated ?? item.lastUpdated ?? nested?.lastChapterAddedAt ?? item.lastChapterAddedAt ?? nested?.updatedAt ?? item.updatedAt ?? item.modified) as string | undefined) || undefined;
           const rawGenres = getField(item, genreKeys);
-          const genres = Array.isArray(rawGenres)
-            ? (rawGenres as { name?: string }[]).map(genre => (typeof genre === "string" ? genre : genre.name ?? "").trim()).filter(Boolean)
+          let genres = Array.isArray(rawGenres)
+            ? (rawGenres as { name?: string; tag?: { name?: string } }[]).map(genre => (typeof genre === "string" ? genre : genre.name ?? genre.tag?.name ?? "").trim()).filter(Boolean)
             : undefined;
-          const rawAltTitles = (item.alternativeTitles ?? item.alternative_titles ?? item.alternativeTitle ?? item.alternative_title ?? nested?.nativeTitle) as string | undefined;
+          ({ genres, type } = applyWpTermMap(cfg, item, genres, type));
+          const rawAltTitles = (item.alternativeTitles ?? item.alternative_titles ?? item.alternativeTitle ?? item.alternative_title ?? item.alternative_names ?? nested?.nativeTitle) as string | undefined;
           const alternativeTitle = rawAltTitles?.trim() || undefined;
           return { id, title, cover, description: extractDesc(item, nested), latestChapter, type, genres, seriesUpdatedAt, alternativeTitle, sourceId: cfg.id };
         }).filter(item => item.id && item.title);

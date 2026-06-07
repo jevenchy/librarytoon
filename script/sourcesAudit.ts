@@ -82,8 +82,8 @@ export const EXPECTED_CONTENT_FIELDS: Record<string, readonly SearchFieldKey[]> 
 };
 
 const SEARCH_QUERIES: Record<string, string[]> = {
-  sfw:   ["nano machine", "academy", "demon"],
-  nsfw:  ["secret", "keluarga", "family"],
+  sfw:   ["the", "sword", "demon", "over"],
+  nsfw:  ["my", "bos", "is", "she"],
 };
 
 export type SearchFieldKey    = typeof SEARCH_FIELDS[number];

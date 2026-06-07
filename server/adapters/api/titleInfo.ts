@@ -2,7 +2,7 @@ import type { SearchResult, SourceConfig } from "../../../shared/types.js";
 import { fetchJson } from "../../services/fetchService.js";
 import { getFetchOpts, extractDesc, fixMojibake, getField } from "../shared.js";
 import { wordpressEnrichTitleFromBareArray } from "../wordpress/index.js";
-import { apiBase, apiCover, dedupTitle, matchEnvelope } from "./index.js";
+import { apiBase, apiCover, dedupTitle, matchEnvelope, applyWpTermMap } from "./index.js";
 
 export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<SearchResult | null> {
   const base = apiBase(cfg);
@@ -87,12 +87,13 @@ export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<
           const rawId = (getField(firstEntry, idKeys) ?? titleId) as string;
           const cover = apiCover((getField(firstEntry, coverKeys) ?? "") as string, cfg);
           const description = extractDesc(firstEntry, null);
-          const type = (firstEntry.type as string | undefined) || undefined;
-          const genres = Array.isArray(firstEntry.genre)
+          let type = (firstEntry.type as string | undefined) || undefined;
+          let genres = Array.isArray(firstEntry.genre)
             ? (firstEntry.genre as Record<string, unknown>[])
                 .map(genre => genre.name as string | undefined)
                 .filter((name): name is string => typeof name === "string" && name.length > 0)
             : undefined;
+          ({ genres, type } = applyWpTermMap(cfg, firstEntry, genres, type));
           const chNums = Array.isArray(firstEntry.data)
             ? (firstEntry.data as Record<string, unknown>[])
                 .map(entry => parseFloat(String(entry.chapter ?? "")))
@@ -100,14 +101,21 @@ export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<
             : [];
           const latestChapter = chNums.length > 0 ? Math.max(...chNums) : undefined;
 
-          let seriesUpdatedAt: string | undefined;
+          let seriesUpdatedAt: string | undefined = (firstEntry.modified as string | undefined) || undefined;
           let alternativeTitle: string | undefined;
-          try {
-            const enriched = await wordpressEnrichTitleFromBareArray(cfg, titleId);
-            seriesUpdatedAt = enriched.seriesUpdatedAt;
-            alternativeTitle = enriched.alternativeTitle;
-          } catch {
-            // WordPress post/dates enrichment failed. Returns without additional series fields.
+          if (!seriesUpdatedAt) {
+            try {
+              const enriched = await wordpressEnrichTitleFromBareArray(cfg, titleId);
+              seriesUpdatedAt = enriched.seriesUpdatedAt;
+              alternativeTitle = enriched.alternativeTitle;
+            } catch {}
+          }
+          if (!alternativeTitle && fieldMap?.alternativeTitle) {
+            const rawAlt = getField(firstEntry, fieldMap.alternativeTitle) as string | undefined;
+            if (rawAlt) {
+              const parts = rawAlt.split(",").map(part => part.trim()).filter(part => part && part.toLowerCase() !== title.toLowerCase());
+              alternativeTitle = parts.join(", ") || undefined;
+            }
           }
 
           if (title && title !== titleId) {
@@ -119,20 +127,26 @@ export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<
 
       // Flat top-level object with no envelope wrapper. Title and fields sit directly at the root.
       if (typeof res.title === "string" && (res.slug != null || res.id != null)) {
-        const id = (res.slug ?? res.id ?? titleId) as string;
+        const fieldMap = cfg.api?.fieldMap;
+        const idKeys    = fieldMap?.id     ?? [];
+        const coverKeys = fieldMap?.cover  ?? [];
+        const typeKeys  = fieldMap?.type   ?? [];
+        const genreKeys = fieldMap?.genres ?? [];
+        const id = ((idKeys.length > 0 ? getField(res, idKeys) : null) ?? res.slug ?? res.id ?? titleId) as string;
         const title = dedupTitle(res.title);
-        const cover = apiCover((res.cover ?? res.coverImage ?? res.cover_image_url ?? "") as string, cfg);
+        const cover = apiCover(((coverKeys.length > 0 ? getField(res, coverKeys) : null) ?? res.cover ?? res.coverImage ?? res.cover_image_url ?? "") as string, cfg);
         const description = extractDesc(res, null);
-        const type = ((res.type ?? res.format) as string | undefined) || undefined;
-        const genres = Array.isArray(res.genres)
-          ? (res.genres as Array<string | { name?: string }>)
-              .map(genre => (typeof genre === "string" ? genre : genre.name ?? "").trim())
+        const rawType = (typeKeys.length > 0 ? getField(res, typeKeys) : null) ?? res.type ?? res.format;
+        const type = (rawType as string | undefined)?.toLowerCase().replace(/\s*\+\s*\d+/g, "").trim() || undefined;
+        const rawGenres = genreKeys.length > 0 ? getField(res, genreKeys) : res.genres;
+        const genres = Array.isArray(rawGenres)
+          ? (rawGenres as Array<string | { name?: string; tag?: { name?: string } }>)
+              .map(genre => (typeof genre === "string" ? genre : genre.name ?? genre.tag?.name ?? "").trim())
               .filter(Boolean)
           : undefined;
-        const rawAlt = (res.alternativeTitles ?? res.alternative_titles ?? res.nativeTitle) as string | undefined;
+        const rawAlt = (res.alternativeTitles ?? res.alternative_titles ?? res.alternative_names ?? res.nativeTitle) as string | undefined;
         const alternativeTitle = rawAlt ? fixMojibake(rawAlt).trim() || undefined : undefined;
         const seriesUpdatedAt = ((res.lastChapterAddedAt ?? res.updatedAt ?? res.updated_at) as string | undefined) || undefined;
-        // Use chapterCount as the latestChapter proxy to avoid triggering a separate chapters fetch.
         const stats = res.stats as Record<string, unknown> | undefined;
         const rawCount = stats?.chapterCount ?? res.chapterCount ?? res.totalChapters;
         const latestChapter = rawCount != null && !Number.isNaN(Number(rawCount)) ? Number(rawCount) : undefined;

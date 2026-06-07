@@ -14,7 +14,7 @@ export const VALID_CONFIG_KEYS = new Set<keyof SourceConfig>([
   "name", "description", "language", "contentRating", "note", "color", "official",
   "seriesPath", "chapterPath", "nestedChapterIds", "titleAfterPipe", "titleFromPipe",
   "chapterNumberPattern", "chaptersAscending", "chapterDeduplicate",
-  "chapterBatchSize", "chapterIdWithTitle",
+  "chapterBatchSize", "chapterIdWithTitle", "chapterListAppend",
   "proxyImages", "imageCdn", "imageReferer", "nextRsc",
   "selectors",
   "wordpress", "api", "search", "images", "network", "fallback",

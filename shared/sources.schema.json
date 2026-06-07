@@ -65,6 +65,7 @@
     "chaptersAscending": { "type": "boolean" },
     "chapterDeduplicate": { "type": "boolean" },
     "chapterBatchSize": { "type": "integer", "minimum": 1 },
+    "chapterListAppend": { "type": "string" },
     "chapterIdWithTitle": { "type": "boolean" },
     "proxyImages": { "type": "boolean" },
     "imageCdn": { "type": "string" },
@@ -94,6 +95,7 @@
         "chapterTitle": { "type": "string" },
         "chapterDate": { "type": "string" },
         "chapterDateAttr": { "type": "string" },
+        "chapterHrefAttr": { "type": "string" },
         "chapterItemLocked": { "type": "string" },
         "pageImage": { "type": "string" },
         "imageAttr": { "type": "string" },
@@ -157,6 +159,8 @@
         "chapterEndpoints": { "type": "array", "items": { "type": "string" } },
         "pageEndpoints": { "type": "array", "items": { "type": "string" } },
         "slugSuffix": { "type": "string" },
+        "chapterIdTemplate": { "type": "string" },
+        "wpTermMap": { "type": "object", "additionalProperties": { "type": "string" } },
         "fieldMap": {
           "type": "object",
           "additionalProperties": false,
@@ -166,7 +170,8 @@
             "cover":   { "type": "array", "items": { "type": "string" } },
             "chapter": { "type": "array", "items": { "type": "string" } },
             "type":    { "type": "array", "items": { "type": "string" } },
-            "genres":  { "type": "array", "items": { "type": "string" } }
+            "genres":           { "type": "array", "items": { "type": "string" } },
+            "alternativeTitle": { "type": "array", "items": { "type": "string" } }
           }
         },
         "chapterFieldMap": {

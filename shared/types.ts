@@ -72,6 +72,7 @@ export type SourceSelectors = {
   chapterTitle?: string;
   chapterDate?: string;
   chapterDateAttr?: string;
+  chapterHrefAttr?: string;
   chapterItemLocked?: string;
   pageImage?: string;
   imageAttr?: string;
@@ -93,6 +94,7 @@ export type ApiFieldMap = {
   chapter?: string[];
   type?: string[];
   genres?: string[];
+  alternativeTitle?: string[];
 };
 
 export type ApiChapterFieldMap = {
@@ -135,6 +137,8 @@ export type ApiConfig = {
   fieldMap?: ApiFieldMap;
   chapterFieldMap?: ApiChapterFieldMap;
   pageFieldMap?: ApiPageFieldMap;
+  chapterIdTemplate?: string;
+  wpTermMap?: Record<string, string>;
 };
 
 export type SearchConfig = {
@@ -208,6 +212,7 @@ export type SourceConfig = {
   chaptersAscending?: boolean;
   chapterDeduplicate?: boolean;
   chapterBatchSize?: number;
+  chapterListAppend?: string;
   /** Prefix chapter IDs with "{titleId}/" so pages adapter builds /api/read/{titleId}/{chapterSlug} */
   chapterIdWithTitle?: boolean;
 
