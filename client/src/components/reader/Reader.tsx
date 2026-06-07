@@ -241,7 +241,7 @@ export default function Reader({
                     transition-transform duration-300 ${uiVisible && !(isSpeedPanelVisible || isChapterPanelVisible) ? "translate-y-0" : "-translate-y-full"}`}
       >
         <div className="max-w-reader mx-auto px-4 sm:px-6 py-3">
-          <div className="rounded-card-outer bg-panel p-2">
+          <div className="rounded-card-outer bg-panel p-2 transition-colors">
             <div className="rounded-2xl border border-dashed border-edge-bright px-4 py-3">
               <div className="flex items-center gap-3">
                 <Link
@@ -316,7 +316,7 @@ export default function Reader({
               aria-disabled="true"
               className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
                          outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/15
-                         pointer-events-none select-none"
+                         pointer-events-none select-none transition-colors"
             >
               <FiChevronLeft size={20} />
             </span>
@@ -352,7 +352,7 @@ export default function Reader({
               aria-disabled="true"
               className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
                          outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/15
-                         pointer-events-none select-none"
+                         pointer-events-none select-none transition-colors"
             >
               <FiChevronRight size={20} />
             </span>
@@ -395,7 +395,7 @@ export default function Reader({
       )}
       {isSpeedPanelVisible && (
         <div role="dialog" aria-modal="true" aria-label="Autoscroll speed" className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4" onClick={event => event.stopPropagation()}>
-          <div className="rounded-card-outer bg-panel p-2">
+          <div className="rounded-card-outer bg-panel p-2 transition-colors">
             <div className="rounded-2xl border border-dashed border-edge-bright px-5 py-4">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm font-bold text-foreground/85">Autoscroll Speed</p>
@@ -436,7 +436,7 @@ export default function Reader({
           className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4"
           onClick={event => event.stopPropagation()}
         >
-          <div className="rounded-card-outer bg-panel p-2 flex flex-col" style={{ maxHeight: "55vh" }}>
+          <div className="rounded-card-outer bg-panel p-2 flex flex-col transition-colors" style={{ maxHeight: "55vh" }}>
             <div className="rounded-2xl border border-dashed border-edge-bright flex flex-col overflow-hidden">
 
               <div className="flex items-center justify-between px-5 py-3 shrink-0">

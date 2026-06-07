@@ -1,7 +1,7 @@
 {
   "$schema": "../../shared/sources.schema.json",
   "id": "kaynscan",
-  "baseUrl": "https://kaynscan.com",
+  "baseUrl": "https://kaynscan.org",
   "method": "html",
   "urlFormat": "slug",
   "seriesUrl": "/series/",
@@ -9,12 +9,11 @@
   "selectors": {
     "chapterTitle": ".text-sm.truncate",
     "chapterDateAttr": "d",
-    "chapterItemLocked": "img[src*='material-symbols:lock']",
     "pageImage": "img[uid]",
     "imageAttr": "uid",
     "seriesDescription": "#expand_content p",
-    "seriesType": "div[class*='uppercase'][class*='min-h-8']",
-    "seriesAltTitle": "span.text-md"
+    "seriesType": "span.text-xs.font-medium.inline-block.border",
+    "seriesAltTitleAstroKey": "alternativeTitles"
   },
   "proxyImages": true,
   "images": {
@@ -25,9 +24,9 @@
     "listingUrl": "/series/",
     "ajaxFallback": false
   },
-  "knownMissing": ["genres"],
+  "nestedChapterIds": true,
   "color": "#2563eb",
   "contentRating": "sfw",
   "language": "en",
-  "enabled": false
+  "enabled": true
 }

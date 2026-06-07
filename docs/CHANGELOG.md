@@ -4,7 +4,22 @@ All notable changes to Librarytoon will be documented in this file.
 
 ---
 
-## [1.0.0] - 2026-05-06
+## [1.1.0] - 2026-06-07
+
+### Added
+
+- Sources: 5 new manga/manhwa sources
+- Adapters: configurable `chapterIdTemplate`, `wpTermMap`, `chapterListAppend`, `chapterHrefAttr`, and `alternativeTitle` field mapping
+
+### Fixed
+
+- Sources: corrected config and re-enabled 4 sources that were broken or disabled
+- Detail: missing or blank genre, type, alternative title, cover, and last-updated date for some sources
+- Chapters/pages: stale empty-result caching that kept Retry from re-fetching after a transient failure
+
+---
+
+## [1.0.0] - 2026-06-05
 
 ### Added
 

@@ -1,0 +1,36 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "themanga",
+  "baseUrl": "https://themanga.site",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/manga/{slug}/chapter/",
+  "selectors": {
+    "searchItem": "a.manga-card",
+    "searchTitle": ".card-title",
+    "chapterItem": "div.chapter-row[data-href]",
+    "chapterTitle": ".chapter-title",
+    "chapterDate": "[data-local-time]",
+    "chapterDateAttr": "data-local-time",
+    "chapterHrefAttr": "data-href",
+    "pageImage": "img.page-img",
+    "seriesCover": ".hero-cover img",
+    "seriesType": ".meta-item-label:contains(Type) ~ .meta-item-value",
+    "seriesGenres": "span.genre",
+    "seriesAltTitle": ".hero-alt-title",
+    "seriesDescription": "p.synopsis-text"
+  },
+  "proxyImages": true,
+  "imageReferer": "https://themanga.site",
+  "search": {
+    "endpoints": ["/explore?q={q}"],
+    "ajaxFallback": false,
+    "listingFallback": false
+  },
+  "chapterListAppend": "?all=1&page=1",
+  "color": "#6366f1",
+  "contentRating": "sfw",
+  "language": "id",
+  "enabled": true
+}

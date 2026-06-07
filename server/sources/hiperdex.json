@@ -1,0 +1,22 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "hiperdex",
+  "baseUrl": "https://hiperdex.com",
+  "method": "wordpress",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/manga/{slug}/chapter-01/",
+  "wordpress": {
+    "theme": "madara",
+    "skipReaderKiru": true,
+    "seriesEndpoint": "manga",
+    "chapterEndpoint": "chapter"
+  },
+  "proxyImages": true,
+  "imageReferer": "https://hiperdex.com",
+  "knownMissing": ["seriesUpdatedAt"],
+  "color": "#6366f1",
+  "contentRating": "nsfw",
+  "language": "en",
+  "enabled": true
+}

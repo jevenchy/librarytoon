@@ -1,0 +1,36 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "templetoons",
+  "baseUrl": "https://templetoons.com",
+  "method": "api",
+  "urlFormat": "slug",
+  "seriesUrl": "/comic/",
+  "chapterUrl": "/comic/{slug}/chapter-01",
+  "api": {
+    "pagination": "none",
+    "searchEndpoints": ["/api/search?q={q}&page=1&limit={limit}"],
+    "titleInfoEndpoints": ["/api/comic/{titleId}"],
+    "chapterEndpoints": ["/api/comic/{titleId}"],
+    "pageEndpoints": ["/api/comic/{seriesSlug}/{chapterSlug}"],
+    "fieldMap": {
+      "id": ["series_slug"],
+      "title": ["title"],
+      "cover": ["thumbnail"],
+      "type": ["badge"],
+      "genres": ["tag_series"]
+    },
+    "chapterFieldMap": {
+      "id": ["chapter_slug"],
+      "number": ["index"],
+      "title": ["chapter_name"],
+      "date": ["created_at"]
+    }
+  },
+  "proxyImages": true,
+  "imageReferer": "https://templetoons.com",
+  "knownMissing": ["seriesUpdatedAt"],
+  "color": "#f43f5e",
+  "contentRating": "nsfw",
+  "language": "en",
+  "enabled": true
+}

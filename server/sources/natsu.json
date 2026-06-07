@@ -1,0 +1,42 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "natsu",
+  "baseUrl": "https://natsu.tv",
+  "method": "api",
+  "urlFormat": "slug",
+  "seriesUrl": "/manga/",
+  "chapterUrl": "/manga/{slug}/",
+  "api": {
+    "pagination": "offset",
+    "chapterIdTemplate": "chapter-{number}.{id}",
+    "searchEndpoints": ["/wp-json/wp/v2/manga?search={q}&per_page={limit}&_embed=wp:featuredmedia,wp:term"],
+    "titleInfoEndpoints": ["/wp-json/wp/v2/manga?slug={titleId}&_embed=wp:featuredmedia,wp:term"],
+    "chapterEndpoints": ["/wp-json/wp/v2/chapter?search={titleId}&per_page=100&offset={offset}&_fields=id,title,date&orderby=date&order=asc"],
+    "fieldMap": {
+      "id": ["slug"],
+      "title": ["title.rendered"],
+      "cover": ["_embedded.wp:featuredmedia.0.source_url"],
+      "alternativeTitle": ["meta.meta.search_index"]
+    },
+    "chapterFieldMap": {
+      "id": ["id"],
+      "number": [],
+      "title": ["title.rendered"],
+      "date": ["date"]
+    },
+    "wpTermMap": {
+      "genres": "genre",
+      "type": "type"
+    }
+  },
+  "proxyImages": true,
+  "imageReferer": "https://natsu.tv",
+  "images": {
+    "excludeKeywords": ["wp-content/uploads"]
+  },
+  "chapterBatchSize": 100,
+  "color": "#f97316",
+  "contentRating": "sfw",
+  "language": "id",
+  "enabled": true
+}

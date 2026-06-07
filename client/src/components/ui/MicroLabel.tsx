@@ -46,7 +46,7 @@ export default function MicroLabel({
     return (
       <span
         style={style}
-        className={`text-[10px] px-1.5 py-0.5 rounded border border-dashed leading-none
+        className={`text-[10px] px-1.5 py-0.5 rounded border border-dashed leading-none transition-colors
           ${mono ? "font-data" : "uppercase tracking-wider"}
           ${BADGE_COLORS[color]}
           ${className ?? ""}`}
@@ -58,7 +58,7 @@ export default function MicroLabel({
 
   return (
     <span
-      className={`text-[10px] font-semibold uppercase tracking-widest text-foreground/40
+      className={`text-[10px] font-semibold uppercase tracking-widest text-foreground/40 transition-colors
         ${className ?? ""}`}
     >
       {children}

@@ -14,6 +14,7 @@
       "id": ["slug"],
       "title": ["postTitle"],
       "cover": ["featuredImage"],
+      "chapter": ["chapters"],
       "type": ["seriesType"]
     }
   },

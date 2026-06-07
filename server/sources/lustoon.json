@@ -1,0 +1,20 @@
+{
+  "$schema": "../../shared/sources.schema.json",
+  "id": "lustoon",
+  "baseUrl": "https://lustoon.com",
+  "method": "html",
+  "urlFormat": "slug",
+  "seriesUrl": "/comic/",
+  "chapterUrl": "/comic/{slug}/chapter-01",
+  "nextRsc": true,
+  "proxyImages": true,
+  "imageReferer": "https://lustoon.com",
+  "search": {
+    "listingUrl": "/comics"
+  },
+  "nestedChapterIds": true,
+  "color": "#e11d48",
+  "contentRating": "nsfw",
+  "language": "en",
+  "enabled": true
+}
