@@ -8,41 +8,41 @@ import EmptyState from "../components/ui/EmptyState.js";
 import ErrorMessage from "../components/ui/ErrorMessage.js";
 import { API } from "../lib/api.js";
 import { KEYS, lsSet, lsGet } from "../lib/storageKeys.js";
+import { readBookmarks, writeBookmarks } from "../lib/bookmarkUtils.js";
 import { useSourcesStore } from "../store/sources.js";
 import { formatDate } from "../lib/dateUtils.js";
 import { decodeHtml } from "../lib/htmlUtils.js";
 
 function SkeletonDetail({ backTo }: { backTo: string }) {
   return (
-    <div className="mx-auto max-w-content px-6 py-10">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-1">
-          <Link
-            to={backTo}
-            className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/80 active:text-foreground/80 transition-colors"
-          >
-            <FiArrowLeft size={20} />
-            Back
-          </Link>
-          <h1 className="text-sm font-bold text-foreground/90 tracking-wide">Detail</h1>
-        </div>
-        <div className="mt-2 h-4 w-48 rounded skeleton-shimmer" />
+    <div className="mx-auto w-full max-w-content px-6 pt-8 pb-20">
+      <div className="mb-4">
+        <Link
+          to={backTo}
+          className="inline-flex items-center gap-1.5 text-sm text-foreground/60 hover:text-foreground/90 active:text-foreground/90 transition-colors"
+        >
+          <FiArrowLeft size={16} />
+          Back
+        </Link>
+        <h1 className="sr-only">Detail</h1>
       </div>
 
-      <div className="rounded-card-outer bg-panel p-2 mb-8">
-        <div className="flex gap-4 rounded-2xl border border-dashed border-edge p-4">
-          <div className="shrink-0 w-[120px] sm:w-[160px]">
-            <div className="w-full aspect-[2/3] rounded-xl skeleton-shimmer" />
+      <div className="rounded-card-outer bg-panel p-2 mb-4 transition-colors">
+        <div className="flex flex-col sm:flex-row gap-4 rounded-card-inner border-2 border-dashed border-edge-bright p-4">
+          <div className="shrink-0 w-44 mx-auto sm:mx-0">
+            <div className="w-full aspect-[2/3] rounded-card-inner overflow-hidden border-2 border-dashed border-edge bg-panel">
+              <div className="w-full h-full skeleton-shimmer" />
+            </div>
           </div>
-          <div className="flex flex-col gap-2 flex-1 pt-0.5">
-            <div className="h-4 w-3/4 rounded skeleton-shimmer" />
-            <div className="h-3 w-1/2 rounded skeleton-shimmer" />
-            <div className="flex flex-col gap-1.5 mt-2">
-              <div className="h-3 w-2/5 rounded skeleton-shimmer" />
-              <div className="h-3 w-1/4 rounded skeleton-shimmer" />
-              <div className="h-3 w-3/5 rounded skeleton-shimmer" />
-              <div className="h-3 w-1/5 rounded skeleton-shimmer" />
-              <div className="h-3 w-1/4 rounded skeleton-shimmer" />
+          <div className="flex flex-col gap-1 flex-1">
+            <div className="h-7 w-3/4 rounded skeleton-shimmer" />
+            <div className="h-4 w-1/2 rounded skeleton-shimmer" />
+            <div className="flex flex-col gap-1.5 mt-3">
+              <div className="h-5 w-2/5 rounded skeleton-shimmer" />
+              <div className="h-5 w-1/4 rounded skeleton-shimmer" />
+              <div className="h-5 w-3/5 rounded skeleton-shimmer" />
+              <div className="h-5 w-1/5 rounded skeleton-shimmer" />
+              <div className="h-5 w-1/4 rounded skeleton-shimmer" />
             </div>
           </div>
         </div>
@@ -57,31 +57,6 @@ function SkeletonDetail({ backTo }: { backTo: string }) {
       </div>
     </div>
   );
-}
-
-type Bookmark = { sourceId: string; titleId: string; title: string; cover: string; bookmarkedAt: string };
-
-function isBookmark(value: unknown): value is Bookmark {
-  return (
-    typeof value === "object" && value !== null &&
-    typeof (value as Record<string, unknown>).sourceId === "string" &&
-    typeof (value as Record<string, unknown>).titleId  === "string"
-  );
-}
-
-function readBookmarks(): Bookmark[] {
-  try {
-    const raw = lsGet(KEYS.bookmarks) ?? "[]";
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isBookmark);
-  } catch {
-    return [];
-  }
-}
-
-function writeBookmarks(bookmarks: Bookmark[]): void {
-  lsSet(KEYS.bookmarks, JSON.stringify(bookmarks));
 }
 
 const META_CACHE_TTL = 30 * 60 * 1000;
@@ -132,9 +107,7 @@ export default function Detail() {
 
   const [meta, setMeta] = useState<SearchResult | null>(() => {
     const cached = readMetaCache(sourceId, decodedId);
-    // When navigating from search, routerMeta.cover is fresh and reliable.
-    // Apply it over the cached cover so the banner is correct from the first render,
-    // even if a previous visit cached a wrong cover (e.g. lazy-loaded placeholder).
+    // Override cached cover with routerMeta.cover to avoid a stale wrong-cover from a prior lazy-load cycle.
     if (cached && routerMeta?.cover) return { ...cached, cover: routerMeta.cover };
     return cached ?? routerMeta ?? null;
   });
@@ -179,8 +152,7 @@ export default function Detail() {
     const fetchMeta = API.titleInfo(sourceId, decodedId, controller.signal)
       .then(titleInfo => {
         if (!isCancelled && titleInfo) {
-          // routerMeta.cover (fresh search result) is most reliable, prefer over possibly-stale cache.
-          const merged = { ...titleInfo, cover: routerMeta?.cover || seedMeta?.cover || titleInfo.cover };
+          const merged = { ...titleInfo, cover: titleInfo.cover || routerMeta?.cover || seedMeta?.cover || "" };
           setMeta(merged);
           writeMetaCache(sourceId, decodedId, merged);
         }
@@ -233,7 +205,9 @@ export default function Detail() {
     return () => { document.title = "Librarytoon"; };
   }, [title]);
 
+  const [isCoverFailed, setIsCoverFailed] = useState(false);
   const cover         = meta?.cover ?? "";
+  useEffect(() => { setIsCoverFailed(false); }, [cover]);
   const description   = meta?.description;
   const latestChapter = meta?.latestChapter;
   const detailSource   = useSourcesStore(state => state.sources.find(src => src.id === sourceId));
@@ -312,7 +286,7 @@ export default function Detail() {
           action={
             <button
               onClick={() => { setIsTimedOut(false); setRetryCount(prev => prev + 1); }}
-              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/80 active:text-foreground/80 transition-colors"
+              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/50 hover:text-foreground/80 active:text-foreground/80 transition-colors"
             >
               <FiRefreshCw size={12} />
               Refresh
@@ -328,28 +302,25 @@ export default function Detail() {
   }
 
   return (
-    <div className="mx-auto max-w-content px-6 py-10">
+    <div className="mx-auto w-full max-w-content px-6 pt-8 pb-20">
 
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-1">
-          <Link
-            to={backPath ?? "/"}
-            className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/80 active:text-foreground/80 transition-colors"
-          >
-            <FiArrowLeft size={20} />
-            Back
-          </Link>
-          <h1 className="text-sm font-bold text-foreground/90 tracking-wide">Detail</h1>
-        </div>
+        <Link
+          to={backPath ?? "/"}
+          className="inline-flex items-center gap-1.5 text-sm text-foreground/60 hover:text-foreground/90 active:text-foreground/90 transition-colors"
+        >
+          <FiArrowLeft size={16} />
+          Back
+        </Link>
       </div>
 
       <div className="rounded-card-outer bg-panel p-2 mb-4 transition-colors">
-        <div className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-dashed border-edge-bright p-4">
+        <div className="flex flex-col sm:flex-row gap-4 rounded-card-inner border-2 border-dashed border-edge-bright p-4">
 
-          <div className="shrink-0 w-[160px] mx-auto sm:mx-0">
-            <div className="w-full aspect-[2/3] rounded-xl overflow-hidden border border-dashed border-edge bg-panel">
-              {cover ? (
-                <img src={cover} alt={title} className="w-full h-full object-cover" draggable={false} />
+          <div className="shrink-0 w-44 mx-auto sm:mx-0">
+            <div className="w-full aspect-[2/3] rounded-card-inner overflow-hidden border-2 border-dashed border-edge bg-panel">
+              {cover && !isCoverFailed ? (
+                <img src={cover} alt={title} onError={() => setIsCoverFailed(true)} className="w-full h-full object-cover" draggable={false} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center sm:justify-start">
                   <FiBookOpen size={28} className="text-foreground/20" />
@@ -359,40 +330,40 @@ export default function Detail() {
           </div>
 
           <div className="flex flex-col min-w-0 flex-1 gap-1">
-            <h2 className="text-sm font-bold text-foreground/90 truncate">{title}</h2>
+            <h1 className="text-xl font-bold text-foreground/90 truncate">{title}</h1>
             {altTitleDisplay && (
-              <p className="text-[11px] text-foreground/35 truncate">{altTitleDisplay.join(", ")}</p>
+              <p className="text-xs text-foreground/55 truncate">{altTitleDisplay.join(", ")}</p>
             )}
 
-            <div className="flex flex-col gap-1.5 mt-2 text-xs">
+            <div className="flex flex-col gap-1.5 mt-3 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-foreground/40 w-[72px] shrink-0">Source :</span>
+                <span className="text-foreground/60 w-[72px] shrink-0">Source :</span>
                 <div className="flex items-center gap-1">
-                  <MicroLabel variant="badge" style={sourceColor ? { borderColor: `${sourceColor}99`, color: "#fff", backgroundColor: `${sourceColor}77` } : undefined}>
+                  <MicroLabel variant="badge" style={sourceColor ? { borderColor: `${sourceColor}66`, color: "#fff", backgroundColor: `${sourceColor}44` } : undefined}>
                     {sourceId}
                   </MicroLabel>
                   {sourceLanguage && <MicroLabel variant="badge" color="faint">{sourceLanguage}</MicroLabel>}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-foreground/40 w-[72px] shrink-0">Type :</span>
-                <span className="font-data text-foreground/50 capitalize">{type ?? "-"}</span>
+                <span className="text-foreground/60 w-[72px] shrink-0">Type :</span>
+                <span className="font-data text-foreground/65 capitalize">{type ?? "-"}</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-foreground/40 w-[72px] shrink-0">Genre :</span>
-                <span className="font-data text-foreground/50 capitalize">
+                <span className="text-foreground/60 w-[72px] shrink-0">Genre :</span>
+                <span className="font-data text-foreground/65 capitalize">
                   {genresDisplay.length > 0 ? genresDisplay.join(", ") : "-"}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-foreground/40 w-[72px] shrink-0">Chapters :</span>
-                <span className="font-data text-foreground/50">
+                <span className="text-foreground/60 w-[72px] shrink-0">Chapters :</span>
+                <span className="font-data text-foreground/65">
                   {chapters.length > 0 ? chapters.length : (latestChapter ?? "-")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-foreground/40 w-[72px] shrink-0">Updated :</span>
-                <span className="font-data text-foreground/50">{formatDate(derivedUpdatedAt)}</span>
+                <span className="text-foreground/60 w-[72px] shrink-0">Updated :</span>
+                <span className="font-data text-foreground/65">{formatDate(derivedUpdatedAt)}</span>
               </div>
             </div>
 
@@ -400,7 +371,7 @@ export default function Detail() {
               <div className="flex items-center gap-2 mt-auto pt-3 sm:justify-end">
                 <button
                   onClick={toggleBookmark}
-                  className={`flex-1 sm:flex-none sm:w-[190px] whitespace-nowrap overflow-hidden justify-center sm:justify-start ${isBookmarked ? "btn-primary" : "btn-ghost"}`}
+                  className={`flex-1 sm:flex-none sm:min-w-[12rem] whitespace-nowrap overflow-hidden justify-center sm:justify-start ${isBookmarked ? "btn-primary" : "btn-ghost"}`}
                   aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
                 >
                   <FiBookmark size={14} className={isBookmarked ? "fill-current" : ""} />
@@ -410,7 +381,7 @@ export default function Detail() {
                   <Link
                     to={`/read/${sourceId}/${encodeURIComponent(decodedId)}/${encodeURIComponent(lastReadChapter.id)}`}
                     state={{ title }}
-                    className="btn-primary flex-1 sm:flex-none sm:w-[190px] whitespace-nowrap overflow-hidden justify-center sm:justify-start"
+                    className="btn-primary flex-1 sm:flex-none sm:min-w-[12rem] whitespace-nowrap overflow-hidden justify-center sm:justify-start"
                   >
                     <FiBookOpen size={14} />
                     Continue - Ch. {lastReadChapter.number}
@@ -419,7 +390,7 @@ export default function Detail() {
                   <Link
                     to={`/read/${sourceId}/${encodeURIComponent(decodedId)}/${encodeURIComponent(firstChapter.id)}`}
                     state={{ title }}
-                    className="btn-primary flex-1 sm:flex-none sm:w-[190px] whitespace-nowrap overflow-hidden justify-center sm:justify-start"
+                    className="btn-primary flex-1 sm:flex-none sm:min-w-[12rem] whitespace-nowrap overflow-hidden justify-center sm:justify-start"
                   >
                     <FiBookOpen size={14} />
                     Start reading
@@ -439,7 +410,7 @@ export default function Detail() {
           action={
             <button
               onClick={retry}
-              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/70 active:text-foreground/70 transition-colors"
+              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/50 hover:text-foreground/70 active:text-foreground/70 transition-colors"
             >
               <FiRefreshCw size={14} className={isRetrying ? "animate-spin" : ""} />
               Retry
@@ -456,7 +427,7 @@ export default function Detail() {
           action={
             <button
               onClick={retry}
-              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/40 hover:text-foreground/70 active:text-foreground/70 transition-colors"
+              className="mt-1 inline-flex items-center gap-1.5 text-xs text-foreground/50 hover:text-foreground/70 active:text-foreground/70 transition-colors"
             >
               <FiRefreshCw size={14} className={isRetrying ? "animate-spin" : ""} />
               Retry

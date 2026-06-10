@@ -4,6 +4,23 @@ All notable changes to Librarytoon will be documented in this file.
 
 ---
 
+## [1.2.0] - 2026-06-10
+
+### Added
+
+- Search: dedicated `/search` page, separated from Home/Discover, with source filter chips, online/offline detection, and retry on failure
+- Navbar: collapsible search input in the desktop header, restructured mobile header and drawer
+- Bookmarks: sort toggle (newest/oldest)
+- Adapters: fall back to the chapter list for latest chapter and last-updated date when a source keeps chapters in a separate post type
+
+### Changed
+
+- Home: simplified to Discover-only (hero carousel + source grid)
+- UI: refreshed card, badge, filter-tab, and button styling, wider content max-width, new badge color for overlays on cover images
+- Sources: filterable by language and content rating, restructured add-source modal
+
+---
+
 ## [1.1.0] - 2026-06-07
 
 ### Added

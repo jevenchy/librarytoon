@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./components/layout/Layout.js";
 import Home from "./pages/Home.js";
+import Search from "./pages/Search.js";
 import Detail from "./pages/Detail.js";
 import Reader from "./pages/Reader.js";
 import Sources from "./pages/Sources.js";
@@ -23,6 +24,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
+          <Route path="/search" element={<ErrorBoundary><Search /></ErrorBoundary>} />
           <Route path="/bookmarks" element={<ErrorBoundary><Bookmarks /></ErrorBoundary>} />
           <Route path="/sources" element={<ErrorBoundary><Sources /></ErrorBoundary>} />
           <Route path="/detail/:sourceId/:titleId" element={<ErrorBoundary><Detail /></ErrorBoundary>} />

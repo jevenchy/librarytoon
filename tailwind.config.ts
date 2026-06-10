@@ -28,15 +28,17 @@ export default {
         data:    ["'Roboto Mono'", "ui-monospace", "monospace"],
       },
       maxWidth: {
-        content: "72rem",
+        content: "88rem",
         reader:  "56rem",
       },
       borderRadius: {
-        "card-outer": "1.5rem",
-        "card-inner": "1.25rem",
+        "card-outer":   "1.5rem",
+        "card-inner":   "1rem",
+        chip:           "0.375rem",
+        "card-chapter": "0.75rem",
       },
       spacing: {
-        "card-inset": "3px",
+        "card-inset": "0.5rem",
       },
     }
   },

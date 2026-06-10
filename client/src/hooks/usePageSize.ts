@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const QUERY = "(min-width: 640px)";
-const WIDE_SIZE = 18;
+const WIDE_SIZE = 28;
 const NARROW_SIZE = 8;
 
 export function usePageSize(): number {

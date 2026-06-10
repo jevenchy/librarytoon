@@ -22,9 +22,9 @@ function friendlyError(err: string): string {
 export default function ErrorMessage({ message, className, action }: Props) {
   return (
     <div className={`rounded-card-outer bg-panel p-2 transition-colors ${className ?? ""}`}>
-      <div className="rounded-2xl border border-dashed border-edge-bright p-8 flex flex-col items-center gap-3">
-        <FiWifiOff size={32} className="text-foreground/10" />
-        <p className="text-sm text-foreground/40 text-center">{friendlyError(message)}</p>
+      <div className="rounded-card-inner border-2 border-dashed border-edge-bright p-8 flex flex-col items-center gap-3">
+        <FiWifiOff size={32} className="text-foreground/20" />
+        <p className="text-sm text-foreground/60 text-center">{friendlyError(message)}</p>
         {action}
       </div>
     </div>

@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState, memo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown, FiList, FiArrowLeft, FiPlay, FiPause, FiSettings, FiX, FiSearch } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown, FiList, FiArrowLeft, FiMoon, FiPlay, FiPause, FiSettings, FiSun, FiX, FiSearch } from "react-icons/fi";
 import type { Chapter, Page } from "../../../../shared/types.js";
 import { KEYS, lsSet, lsGet, getStoredTheme } from "../../lib/storageKeys.js";
 import { formatDate } from "../../lib/dateUtils.js";
 import { preloadImages, resetPreloadCache } from "../../lib/imagePreloader.js";
 import { decodeHtml } from "../../lib/htmlUtils.js";
-import { SunIcon, MoonIcon } from "../ui/ThemeIcons.js";
 
 type Props = {
   pages:             Page[];
@@ -242,23 +241,23 @@ export default function Reader({
       >
         <div className="max-w-reader mx-auto px-4 sm:px-6 py-3">
           <div className="rounded-card-outer bg-panel p-2 transition-colors">
-            <div className="rounded-2xl border border-dashed border-edge-bright px-4 py-3">
+            <div className="rounded-card-inner border-2 border-dashed border-edge-bright px-4 py-3">
               <div className="flex items-center gap-3">
                 <Link
                   to={detailUrl ?? "/"}
                   state={backPath ? { _back: backPath } : undefined}
                   aria-label="Back"
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full shrink-0
-                             border border-dashed border-edge-bright text-foreground/50
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-full shrink-0
+                             border-2 border-dashed border-edge-bright text-foreground/50
                              hover:border-foreground/50 hover:text-foreground/80
                              active:border-foreground/50 active:text-foreground/80 transition-colors"
                 >
-                  <FiArrowLeft size={20} />
+                  <FiArrowLeft size={16} />
                 </Link>
                 <div className="flex-1 min-w-0">
                   {titleName && (
-                    <p className="text-sm font-bold text-foreground/85 truncate leading-tight">
-                      {(() => { const decoded = decodeHtml(titleName); return (<><span className="sm:hidden">{decoded.length > 22 ? decoded.slice(0, 22) + "..." : decoded}</span><span className="hidden sm:inline">{decoded.length > 44 ? decoded.slice(0, 44) + "..." : decoded}</span></>); })()}
+                    <p className="reader-title">
+                      {decodeHtml(titleName)}
                     </p>
                   )}
                   {currentChapter && (
@@ -270,12 +269,12 @@ export default function Reader({
                 <button
                   onClick={toggleTheme}
                   aria-label="Toggle theme"
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full shrink-0
-                             border border-dashed border-edge-bright text-foreground/50
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-full shrink-0
+                             border-2 border-dashed border-edge-bright text-foreground/50
                              hover:border-foreground/50 hover:text-foreground/80
                              active:border-foreground/50 active:text-foreground/80 transition-colors"
                 >
-                  {theme === "dark" ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+                  {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
                 </button>
               </div>
             </div>
@@ -298,96 +297,98 @@ export default function Reader({
         className={`fixed bottom-0 left-0 right-0 z-20
                     transition-transform duration-300 ${uiVisible && !(isSpeedPanelVisible || isChapterPanelVisible) ? "translate-y-0" : "translate-y-full"}`}
       >
-        <div className="max-w-reader mx-auto px-4 sm:px-6 py-3 flex items-center justify-center gap-3">
-          {prevChapter && base ? (
-            <Link
-              to={`${base}/${encodeURIComponent(prevChapter.id)}`}
-              state={{ ...(titleName ? { title: titleName } : {}), ...(backPath ? { _back: backPath } : {}) }}
-              aria-label={`Previous chapter ${prevChapter.number}`}
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                         outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/50
-                         hover:outline-foreground/50 hover:text-foreground/80
-                         active:outline-foreground/50 active:text-foreground/80 transition-colors"
-            >
-              <FiChevronLeft size={20} />
-            </Link>
-          ) : (
-            <span
-              aria-disabled="true"
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                         outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/15
-                         pointer-events-none select-none transition-colors"
-            >
-              <FiChevronLeft size={20} />
-            </span>
-          )}
+        <div className="flex justify-center px-4 sm:px-6 py-3">
+          <div className="rounded-card-outer bg-panel p-2 transition-colors">
+            <div className="rounded-card-inner border-2 border-dashed border-edge-bright px-4 py-3">
+              <div className="flex items-center justify-center gap-2">
+                {prevChapter && base ? (
+                  <Link
+                    to={`${base}/${encodeURIComponent(prevChapter.id)}`}
+                    state={{ ...(titleName ? { title: titleName } : {}), ...(backPath ? { _back: backPath } : {}) }}
+                    aria-label={`Previous chapter ${prevChapter.number}`}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                               outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/50
+                               hover:outline-foreground/50 hover:text-foreground/80
+                               active:outline-foreground/50 active:text-foreground/80 transition-colors"
+                  >
+                    <FiChevronLeft size={18} />
+                  </Link>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                               outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/15
+                               pointer-events-none select-none"
+                  >
+                    <FiChevronLeft size={18} />
+                  </span>
+                )}
 
-          {(chaptersLoading || chaptersError || (chapters && chapters.length > 0)) && (
-            <button
-              onClick={() => setIsChapterPanelVisible(true)}
-              aria-label="Chapter list"
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                         outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/50
-                         hover:outline-foreground/50 hover:text-foreground/80
-                         active:outline-foreground/50 active:text-foreground/80 transition-colors"
-            >
-              <FiList size={20} />
-            </button>
-          )}
+                <button
+                  onClick={handleAutoScroll}
+                  aria-label={isAutoScrolling ? "Pause autoscroll" : "Start autoscroll"}
+                  className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                             outline outline-dashed outline-2 [outline-offset:-5px] transition-colors
+                             ${isAutoScrolling
+                               ? "outline-foreground/50 text-foreground/80"
+                               : "outline-edge-bright text-foreground/50 hover:outline-foreground/50 hover:text-foreground/80 active:outline-foreground/50 active:text-foreground/80"
+                             }`}
+                >
+                  {isAutoScrolling ? <FiPause size={18} /> : <FiPlay size={18} />}
+                </button>
 
-          {nextChapter && base ? (
-            <Link
-              to={`${base}/${encodeURIComponent(nextChapter.id)}`}
-              state={{ ...(titleName ? { title: titleName } : {}), ...(backPath ? { _back: backPath } : {}) }}
-              aria-label={`Next chapter ${nextChapter.number}`}
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                         outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/50
-                         hover:outline-foreground/50 hover:text-foreground/80
-                         active:outline-foreground/50 active:text-foreground/80 transition-colors"
-            >
-              <FiChevronRight size={20} />
-            </Link>
-          ) : (
-            <span
-              aria-disabled="true"
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                         outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/15
-                         pointer-events-none select-none transition-colors"
-            >
-              <FiChevronRight size={20} />
-            </span>
-          )}
+                <button
+                  onClick={() => setIsSpeedPanelVisible(prev => !prev)}
+                  aria-label="Autoscroll settings"
+                  className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                             outline outline-dashed outline-2 [outline-offset:-5px] transition-colors
+                             ${isSpeedPanelVisible
+                               ? "outline-foreground/50 text-foreground/80"
+                               : "outline-edge-bright text-foreground/50 hover:outline-foreground/50 hover:text-foreground/80 active:outline-foreground/50 active:text-foreground/80"
+                             }`}
+                >
+                  <FiSettings size={18} />
+                </button>
+
+                {(chaptersLoading || chaptersError || (chapters && chapters.length > 0)) && (
+                  <button
+                    onClick={() => setIsChapterPanelVisible(true)}
+                    aria-label="Chapter list"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                               outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/50
+                               hover:outline-foreground/50 hover:text-foreground/80
+                               active:outline-foreground/50 active:text-foreground/80 transition-colors"
+                  >
+                    <FiList size={18} />
+                  </button>
+                )}
+
+                {nextChapter && base ? (
+                  <Link
+                    to={`${base}/${encodeURIComponent(nextChapter.id)}`}
+                    state={{ ...(titleName ? { title: titleName } : {}), ...(backPath ? { _back: backPath } : {}) }}
+                    aria-label={`Next chapter ${nextChapter.number}`}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                               outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/50
+                               hover:outline-foreground/50 hover:text-foreground/80
+                               active:outline-foreground/50 active:text-foreground/80 transition-colors"
+                  >
+                    <FiChevronRight size={18} />
+                  </Link>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                               outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/15
+                               pointer-events-none select-none"
+                  >
+                    <FiChevronRight size={18} />
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className={`fixed bottom-20 left-4 z-30 flex flex-col items-center gap-2
-                        transition-opacity duration-300 ${(uiVisible || isAutoScrolling) && !(isSpeedPanelVisible || isChapterPanelVisible) ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-
-        <button
-          onClick={handleAutoScroll}
-          aria-label={isAutoScrolling ? "Pause autoscroll" : "Start autoscroll"}
-          className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                     outline outline-dashed outline-1 [outline-offset:-8px] transition-colors
-                     ${isAutoScrolling
-                       ? "outline-foreground/50 text-foreground/80"
-                       : "outline-edge-bright text-foreground/50 hover:outline-foreground/50 hover:text-foreground/80 active:outline-foreground/50 active:text-foreground/80"
-                     }`}
-        >
-          {isAutoScrolling ? <FiPause size={20} /> : <FiPlay size={20} />}
-        </button>
-
-        <button
-          onClick={() => setIsSpeedPanelVisible(prev => !prev)}
-          aria-label="Autoscroll settings"
-          className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                     outline outline-dashed outline-1 [outline-offset:-8px] transition-colors
-                     ${isSpeedPanelVisible
-                       ? "outline-foreground/50 text-foreground/80"
-                       : "outline-edge-bright text-foreground/50 hover:outline-foreground/50 hover:text-foreground/80 active:outline-foreground/50 active:text-foreground/80"
-                     }`}
-        >
-          <FiSettings size={20} />
-        </button>
       </div>
 
       {isSpeedPanelVisible && (
@@ -396,7 +397,7 @@ export default function Reader({
       {isSpeedPanelVisible && (
         <div role="dialog" aria-modal="true" aria-label="Autoscroll speed" className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4" onClick={event => event.stopPropagation()}>
           <div className="rounded-card-outer bg-panel p-2 transition-colors">
-            <div className="rounded-2xl border border-dashed border-edge-bright px-5 py-4">
+            <div className="rounded-card-inner border-2 border-dashed border-edge-bright px-5 py-4">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm font-bold text-foreground/85">Autoscroll Speed</p>
                 <button
@@ -436,8 +437,8 @@ export default function Reader({
           className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4"
           onClick={event => event.stopPropagation()}
         >
-          <div className="rounded-card-outer bg-panel p-2 flex flex-col transition-colors" style={{ maxHeight: "55vh" }}>
-            <div className="rounded-2xl border border-dashed border-edge-bright flex flex-col overflow-hidden">
+          <div className="rounded-card-outer bg-panel p-2 flex flex-col transition-colors max-h-[55vh]">
+            <div className="rounded-card-inner border-2 border-dashed border-edge-bright flex flex-col overflow-hidden">
 
               <div className="flex items-center justify-between px-5 py-3 shrink-0">
                 <p className="text-sm font-bold text-foreground/85">Search Chapter</p>
@@ -450,14 +451,14 @@ export default function Reader({
                 </button>
               </div>
 
-              <div className="flex items-center gap-2.5 mx-3 mb-3 px-4 py-2.5 rounded-full border border-dashed border-edge-bright bg-panel transition-colors focus-within:border-foreground/70 shrink-0">
+              <div className="flex items-center gap-2.5 mx-3 mb-3 px-4 py-2.5 rounded-full border-2 border-dashed border-edge-bright bg-panel transition-colors focus-within:border-foreground/70 shrink-0">
                 <FiSearch size={14} className="text-foreground/30 shrink-0" />
                 <input
                   type="text"
                   placeholder="Search"
                   value={chapterSearch}
                   onChange={event => setChapterSearch(event.target.value)}
-                  className="flex-1 min-w-0 bg-transparent text-[16px] sm:text-xs text-foreground/80 placeholder:text-foreground/30 outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-base sm:text-sm text-foreground/80 placeholder:text-foreground/30 outline-none"
                 />
                 <button
                   onClick={() => setIsChapterSortDesc(prev => !prev)}
@@ -470,7 +471,7 @@ export default function Reader({
 
               <div className="overflow-y-auto px-3 pb-3 space-y-1.5">
                 {filteredChapters.length === 0 && chaptersLoading && (
-                  <div className="flex items-center justify-center gap-1 py-8 text-xs font-semibold text-foreground/40 tracking-wider">
+                  <div className="flex items-center justify-center gap-1 py-8 text-xs font-semibold text-foreground/50 tracking-wider">
                     <span>Loading chapters</span>
                     <span className="inline-flex">
                       <span className="dot-blink" style={{ animationDelay: "0s" }}>.</span>
@@ -480,7 +481,7 @@ export default function Reader({
                   </div>
                 )}
                 {filteredChapters.length === 0 && !chaptersLoading && chaptersError && (
-                  <div className="flex items-center justify-center py-8 text-xs text-foreground/40">
+                  <div className="flex items-center justify-center py-8 text-xs text-foreground/50">
                     Could not load chapters
                   </div>
                 )}
@@ -493,7 +494,7 @@ export default function Reader({
                       });
                       setIsChapterPanelVisible(false);
                     }}
-                    className={`w-full text-left px-4 py-2.5 rounded-full text-sm font-bold transition-colors border border-dashed ${
+                    className={`w-full text-left px-4 py-2.5 rounded-full text-xs font-semibold transition-colors border-2 border-dashed ${
                       chapter.id === currentChapterId
                         ? "border-foreground/70 text-foreground/90"
                         : "border-edge-bright text-foreground/40 hover:border-foreground/40 hover:text-foreground/70"
@@ -501,7 +502,7 @@ export default function Reader({
                   >
                     <span>Chapter {chapter.number}</span>
                     {chapter.chapterUpdatedAt && (
-                      <span className="ml-2 font-normal text-foreground/40 text-xs">{formatDate(chapter.chapterUpdatedAt)}</span>
+                      <span className="ml-2 font-normal text-foreground/50 text-xs">{formatDate(chapter.chapterUpdatedAt)}</span>
                     )}
                   </button>
                 ))}
@@ -512,28 +513,28 @@ export default function Reader({
         </div>
       )}
 
-      <div className={`fixed bottom-20 right-4 z-30 flex flex-col items-center gap-2
+      <div className={`fixed bottom-28 right-4 z-30 flex flex-col items-center gap-2
                         transition-opacity duration-300 ${uiVisible && !(isSpeedPanelVisible || isChapterPanelVisible) ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
-          className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                     outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/50
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                     outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/50
                      hover:outline-foreground/50 hover:text-foreground/80
                      active:outline-foreground/50 active:text-foreground/80 transition-colors"
         >
-          <FiChevronUp size={20} />
+          <FiChevronUp size={16} />
         </button>
 
         <button
           onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" })}
           aria-label="Scroll to bottom"
-          className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-panel
-                     outline outline-dashed outline-1 outline-edge-bright [outline-offset:-8px] text-foreground/50
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-panel
+                     outline outline-dashed outline-2 outline-edge-bright [outline-offset:-5px] text-foreground/50
                      hover:outline-foreground/50 hover:text-foreground/80
                      active:outline-foreground/50 active:text-foreground/80 transition-colors"
         >
-          <FiChevronDown size={20} />
+          <FiChevronDown size={16} />
         </button>
       </div>
 

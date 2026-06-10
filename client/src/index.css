@@ -51,9 +51,10 @@
   html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
   }
   html, body {
-    height: 100%;
+    height: 100dvh;
   }
   #root {
     min-height: 100dvh;
@@ -66,11 +67,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
-    overflow-x: hidden;
   }
 
   ::selection {
-    background: hsl(var(--c-foreground) / 0.1);
+    background: hsl(var(--c-foreground) / 0.15);
   }
 
   ::-webkit-scrollbar {
@@ -102,7 +102,7 @@
   .range-dashed::-webkit-slider-runnable-track {
     height: 2px;
     background: transparent;
-    border: 1px dashed hsl(var(--c-edge-bright));
+    border: 2px dashed hsl(var(--c-edge-bright));
     border-radius: 9999px;
   }
   .range-dashed::-webkit-slider-thumb {
@@ -119,7 +119,7 @@
   .range-dashed::-moz-range-track {
     height: 2px;
     background: transparent;
-    border: 1px dashed hsl(var(--c-edge-bright));
+    border: 2px dashed hsl(var(--c-edge-bright));
     border-radius: 9999px;
   }
   .range-dashed::-moz-range-thumb {
@@ -154,18 +154,6 @@
   }
   .font-data {
     font-family: var(--font-data);
-  }
-  .nav-link {
-    position: relative;
-    transition: opacity 0.3s ease;
-  }
-  .nav-link:hover {
-    opacity: 0.7;
-  }
-  .nav-link.active {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    text-decoration-thickness: 3px;
   }
   .scrollbar-thin {
     scrollbar-width: thin;
@@ -203,37 +191,49 @@
     @apply rounded-card-outer bg-panel p-card-inset;
   }
   .card-inner {
-    @apply rounded-card-inner border border-dashed border-edge;
+    @apply rounded-card-inner border-2 border-dashed border-edge;
   }
-  .micro-label {
-    @apply text-[10px] font-semibold uppercase tracking-widest text-foreground/40;
+  .page-title {
+    @apply text-xl md:text-2xl font-bold text-foreground/85;
+  }
+  .section-title {
+    @apply text-base md:text-lg font-semibold text-foreground/80;
+  }
+  .filter-tab-active {
+    @apply shrink-0 py-3 text-sm font-semibold uppercase tracking-wide
+           border-b-2 border-foreground/70 text-foreground/80 -mb-px transition-colors;
+  }
+  .filter-tab-inactive {
+    @apply shrink-0 py-3 text-sm font-semibold uppercase tracking-wide
+           border-b-2 border-transparent text-foreground/55
+           hover:border-foreground/40 hover:text-foreground/70 -mb-px transition-colors;
   }
   .data-value {
-    @apply font-data text-xs text-foreground/60;
+    @apply font-data text-xs text-foreground/65;
+  }
+  .section-eyebrow {
+    @apply text-xs font-bold uppercase tracking-widest text-foreground/55;
+  }
+  .reader-title {
+    @apply text-sm font-bold text-foreground/85 truncate leading-tight;
   }
   .btn-primary {
     @apply inline-flex items-center gap-1.5 px-4 py-2 rounded-full
-           bg-foreground text-background text-xs font-semibold
+           bg-foreground text-background text-sm font-semibold
            hover:opacity-90 active:opacity-90 transition-opacity
            disabled:opacity-40 disabled:pointer-events-none;
   }
   .btn-ghost {
     @apply inline-flex items-center gap-1.5 px-4 py-2 rounded-full
-           border border-dashed border-edge text-xs text-foreground/50
+           border-2 border-dashed border-edge text-sm text-foreground/50
            hover:border-edge-bright hover:text-foreground/80
            active:border-edge-bright active:text-foreground/80 transition-colors
            disabled:opacity-40 disabled:pointer-events-none;
   }
-  .chip-active {
-    @apply px-4 py-2 rounded-full text-xs font-semibold
-           bg-foreground/10 border border-dashed border-edge-bright text-foreground/80
-           transition-colors;
-  }
-  .chip-inactive {
-    @apply px-4 py-2 rounded-full text-xs font-medium
-           border border-dashed border-edge text-foreground/40
-           hover:border-edge-bright hover:text-foreground/60
-           active:border-edge-bright active:text-foreground/60 transition-colors;
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10
+           text-foreground/40 hover:text-foreground active:text-foreground
+           transition-colors rounded-full;
   }
 }
 

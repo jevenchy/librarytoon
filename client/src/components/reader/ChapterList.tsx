@@ -59,12 +59,12 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
   }, [chapters, isSortAsc, search]);
 
   const [pageSize, setPageSize] = useState(() =>
-    window.matchMedia("(min-width: 1024px)").matches ? 35 : 14
+    window.matchMedia("(min-width: 1024px)").matches ? 30 : 14
   );
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
-    const handler = (event: MediaQueryListEvent) => setPageSize(event.matches ? 35 : 14);
+    const handler = (event: MediaQueryListEvent) => setPageSize(event.matches ? 30 : 14);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
@@ -83,17 +83,12 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
-      <div className="flex gap-4 border-b border-dashed border-edge">
+      <div className="flex gap-4 border-b-2 border-dashed border-edge">
         {(["chapters", "description"] as const).map(view => (
           <button
             key={view}
             onClick={() => setActiveView(view)}
-            className={[
-              "pb-1.5 text-xs font-semibold capitalize transition-colors border-b-2 -mb-px",
-              activeView === view
-                ? "border-foreground/60 text-foreground/80"
-                : "border-transparent text-foreground/35 hover:text-foreground/60"
-            ].join(" ")}
+            className={activeView === view ? "filter-tab-active" : "filter-tab-inactive"}
           >
             {view === "chapters" ? "Chapters" : "Description"}
           </button>
@@ -102,10 +97,10 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
 
       {activeView === "description" && (
         <div className="rounded-card-outer bg-panel p-2 transition-colors">
-          <div className="rounded-2xl border border-dashed border-edge-bright p-5">
+          <div className="rounded-card-inner border-2 border-dashed border-edge-bright p-4">
             {description ? (
               <>
-                <p className="text-xs text-foreground/40 leading-relaxed">
+                <p className="text-sm text-foreground/65 leading-relaxed">
                   {isSynopsisExpanded || description.length <= 1200
                     ? description
                     : description.slice(0, 1200) + "..."}
@@ -113,7 +108,7 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
                 {description.length > 1200 && (
                   <button
                     onClick={() => setIsSynopsisExpanded(prev => !prev)}
-                    className="mt-2 self-start text-xs text-foreground/35 hover:text-foreground/55 transition-colors"
+                    className="mt-2 self-start text-xs text-foreground/50 hover:text-foreground/70 transition-colors"
                   >
                     {isSynopsisExpanded ? "Show less" : "Show more"}
                   </button>
@@ -128,15 +123,15 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
 
       {activeView === "chapters" && (
         <>
-          <div className="flex items-center gap-2.5 rounded-full border border-dashed border-edge-bright bg-panel px-4 py-2.5 transition-colors focus-within:border-foreground/70">
+          <div className="flex items-center gap-2.5 rounded-full border-2 border-dashed border-edge-bright bg-panel px-4 py-2.5 transition-colors focus-within:border-foreground/70">
             <FiSearch size={14} className="text-foreground/30 shrink-0" />
             <input
               type="text"
               placeholder="Search chapter number or title"
               value={search}
               onChange={event => setSearch(event.target.value)}
-              className="flex-1 bg-transparent text-[16px] sm:text-xs text-foreground/80
-                         placeholder:text-foreground/30 outline-none"
+              className="flex-1 bg-transparent text-base sm:text-sm text-foreground/80
+                         placeholder:text-foreground/40 outline-none"
               aria-label="Search chapter number or title"
             />
             <button
@@ -144,13 +139,13 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
               aria-label={isSortAsc ? "Sort newest first" : "Sort oldest first"}
               className="text-foreground/40 hover:text-foreground/70 transition-colors shrink-0"
             >
-              {isSortAsc ? <FiChevronUp size={15} /> : <FiChevronDown size={15} />}
+              {isSortAsc ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
             </button>
           </div>
 
           <div className="rounded-card-outer bg-panel p-2 transition-colors">
-            <div className="rounded-2xl border border-dashed border-edge-bright p-4">
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="rounded-card-inner border-2 border-dashed border-edge-bright p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {paginated.map(chapter => {
                   const isLastRead = lastRead === chapter.id;
                   const isRead     = !isLastRead && readChapters.has(chapter.id);
@@ -160,10 +155,10 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
                       to={`/read/${sourceId}/${encodeURIComponent(titleId)}/${encodeURIComponent(chapter.id)}`}
                       state={{ ...(titleName ? { title: titleName } : {}), ...(backPath ? { _back: backPath } : {}) }}
                       onClick={() => handleNavigate(chapter.id)}
-                      className="rounded-xl border border-dashed border-edge-bright p-4 flex flex-col gap-1.5 transition-colors hover:bg-foreground/[0.04] active:bg-foreground/[0.04]"
+                      className="rounded-card-chapter border-2 border-dashed border-edge-bright p-3 flex flex-col gap-1.5 transition-colors hover:bg-foreground/[0.04] active:bg-foreground/[0.04]"
                     >
                       <div className="flex items-center justify-between gap-1">
-                        <span className={`text-xs font-semibold leading-tight ${
+                        <span className={`text-sm font-semibold leading-tight ${
                           isLastRead ? "text-foreground/85" : isRead ? "text-foreground/40" : "text-foreground/65"
                         }`}>
                           Chapter {chapter.number}
@@ -171,10 +166,10 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
                         {isLastRead ? (
                           <div className="w-1.5 h-1.5 rounded-full bg-foreground/60 shrink-0" />
                         ) : isRead ? (
-                          <FiEye size={10} className="text-foreground/30 shrink-0" />
+                          <FiEye size={14} className="text-foreground/30 shrink-0" />
                         ) : null}
                       </div>
-                      <span className="text-xs text-foreground/30 leading-none">
+                      <span className="text-xs text-foreground/60 leading-none">
                         {formatDate(chapter.chapterUpdatedAt)}
                       </span>
                     </Link>
@@ -184,7 +179,7 @@ export default function ChapterList({ chapters, sourceId, titleId, titleName, ba
             </div>
           </div>
 
-          <Pagination page={page} totalPages={totalPages} onPage={setPage} className="-mt-1 sm:mt-4" />
+          <Pagination page={page} totalPages={totalPages} onPage={setPage} className="mt-4 sm:mt-6" />
         </>
       )}
     </div>

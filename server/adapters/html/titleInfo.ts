@@ -87,8 +87,12 @@ export async function htmlTitleInfo(cfg: SourceConfig, titleId: string): Promise
     const chNums: number[] = [];
     const chapListSel = "#Daftar_Chapter tr,#chapter_list li,.cl li,.eph-num,.series-chapterlist li,a.list-chapter"
       + (cfg.selectors?.chapterItem ? `,${cfg.selectors.chapterItem}` : "");
+    const chapTitleSel = cfg.selectors?.chapterTitle;
     $(chapListSel).each((_slot, el) => {
-      const text = $(el).find("span,a").first().text().trim() || $(el).find("a").first().text().trim() || $(el).text().trim();
+      const text = (chapTitleSel ? $(el).find(chapTitleSel).first().text().trim() : "")
+        || $(el).find("span,a").first().text().trim()
+        || $(el).find("a").first().text().trim()
+        || $(el).text().trim();
       const numMatch = text.match(chapNumRe) ?? text.match(/(\d+(?:\.\d+)?)\s*$/);
       if (numMatch) { const num = Number(numMatch[1]); if (!Number.isNaN(num)) chNums.push(num); }
     });

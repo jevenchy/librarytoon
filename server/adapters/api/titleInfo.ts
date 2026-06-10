@@ -2,7 +2,7 @@ import type { SearchResult, SourceConfig } from "../../../shared/types.js";
 import { fetchJson } from "../../services/fetchService.js";
 import { getFetchOpts, extractDesc, fixMojibake, getField } from "../shared.js";
 import { wordpressEnrichTitleFromBareArray } from "../wordpress/index.js";
-import { apiBase, apiCover, dedupTitle, matchEnvelope, applyWpTermMap } from "./index.js";
+import { apiBase, apiCover, apiChapters, dedupTitle, matchEnvelope, applyWpTermMap } from "./index.js";
 
 export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<SearchResult | null> {
   const base = apiBase(cfg);
@@ -99,7 +99,7 @@ export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<
                 .map(entry => parseFloat(String(entry.chapter ?? "")))
                 .filter(num => !Number.isNaN(num))
             : [];
-          const latestChapter = chNums.length > 0 ? Math.max(...chNums) : undefined;
+          let latestChapter = chNums.length > 0 ? Math.max(...chNums) : undefined;
 
           let seriesUpdatedAt: string | undefined = (firstEntry.modified as string | undefined) || undefined;
           let alternativeTitle: string | undefined;
@@ -116,6 +116,19 @@ export async function apiTitleInfo(cfg: SourceConfig, titleId: string): Promise<
               const parts = rawAlt.split(",").map(part => part.trim()).filter(part => part && part.toLowerCase() !== title.toLowerCase());
               alternativeTitle = parts.join(", ") || undefined;
             }
+          }
+
+          // Some setups keep chapters in a separate post type. Fall back to the chapter list.
+          if ((latestChapter === undefined || !seriesUpdatedAt) && cfg.api?.chapterEndpoints?.length) {
+            try {
+              const chList = await apiChapters(cfg, titleId);
+              if (chList.length > 0) {
+                if (latestChapter === undefined) latestChapter = Math.max(...chList.map(chap => chap.number));
+                if (!seriesUpdatedAt) {
+                  seriesUpdatedAt = chList.map(chap => chap.chapterUpdatedAt).filter((dateStr): dateStr is string => !!dateStr).sort().reverse()[0];
+                }
+              }
+            } catch {}
           }
 
           if (title && title !== titleId) {

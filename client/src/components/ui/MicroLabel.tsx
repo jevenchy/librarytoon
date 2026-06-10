@@ -9,6 +9,7 @@ export type BadgeColor =
   | "orange"
   | "ok"
   | "faint"
+  | "overlay"
   | "danger"
   | "error";
 
@@ -20,7 +21,8 @@ const BADGE_COLORS: Record<BadgeColor, string> = {
   teal:    "border-teal-500/50   text-foreground",
   orange:  "border-orange-500/50 text-foreground",
   ok:      "border-edge-bright   text-ok",
-  faint:   "border-foreground/20 text-foreground",
+  faint:   "border-foreground/40 text-foreground",
+  overlay: "border-white/40      text-white",
   danger:  "border-danger/60     text-white bg-danger/50",
   error:   "border-edge-bright   text-danger",
 };
@@ -46,7 +48,7 @@ export default function MicroLabel({
     return (
       <span
         style={style}
-        className={`text-[10px] px-1.5 py-0.5 rounded border border-dashed leading-none transition-colors
+        className={`text-xs px-1.5 py-0.5 rounded-chip border border-dashed leading-none transition-colors
           ${mono ? "font-data" : "uppercase tracking-wider"}
           ${BADGE_COLORS[color]}
           ${className ?? ""}`}
@@ -58,7 +60,7 @@ export default function MicroLabel({
 
   return (
     <span
-      className={`text-[10px] font-semibold uppercase tracking-widest text-foreground/40 transition-colors
+      className={`text-xs font-semibold uppercase tracking-widest text-foreground/50 transition-colors
         ${className ?? ""}`}
     >
       {children}
