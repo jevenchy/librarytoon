@@ -28,5 +28,8 @@ package-lock.json
 .vscode/
 .claude/
 
+# Test
+/test/
+
 # OS
 Thumbs.db

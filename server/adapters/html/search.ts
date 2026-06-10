@@ -114,9 +114,10 @@ export async function htmlSearch(cfg: SourceConfig, query: string, signal?: Abor
           if (!href.includes(`/${pathPart}/`)) return;
           const id = slug(href);
           const rawTitle =
-            $(el).find("img").attr("alt") ||
+            $(el).attr("title") ||
             $(el).find("[class*='title'],h3,h2").first().text().trim() ||
-            $(el).attr("title") || $(el).text().trim();
+            $(el).find("img").attr("alt") ||
+            $(el).text().trim();
           const title = cleanTitle(rawTitle, cfg);
           if (!title || !norm(title).includes(normalizedQuery)) return;
           const imgEl = $(el).find("img").first();

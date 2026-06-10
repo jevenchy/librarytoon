@@ -9,6 +9,7 @@
     "envelope": "retcode",
     "titleInfoEndpoints": ["/manga/detail/{titleId}"]
   },
+  "proxyImages": true,
   "color": "#f59e0b",
   "contentRating": "sfw",
   "language": "id",

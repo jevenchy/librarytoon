@@ -11,6 +11,7 @@
     "chapterDateAttr": "d",
     "pageImage": "img[uid]",
     "imageAttr": "uid",
+    "seriesCover": "img[alt^='Cover of ']",
     "seriesDescription": "#expand_content p",
     "seriesType": "span.text-xs.font-medium.inline-block.border",
     "seriesAltTitleAstroKey": "alternativeTitles"

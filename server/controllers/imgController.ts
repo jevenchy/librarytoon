@@ -1,10 +1,26 @@
 import type { Request, Response } from "express";
 import axios from "axios";
 import { LRUCache } from "lru-cache";
+import type Sharp from "sharp";
 import { DOH_HTTP_AGENT, DOH_HTTPS_AGENT } from "../services/dohService.js";
 import { isPrivateUrl } from "../utils/ipUtils.js";
 import { verifyImageSig } from "../utils/imageSign.js";
 import { DEFAULT_UA } from "../constants.js";
+import { LOGGER } from "../utils/logger.js";
+
+let sharp: typeof Sharp | undefined;
+try {
+  sharp = (await import("sharp")).default;
+  // BUF_CACHE already caches final outputs, so the libvips operation cache built
+  // into sharp would just be redundant memory on top of that.
+  sharp.cache(false);
+} catch (err) {
+  LOGGER.warn("img_resize_unavailable", { error: err instanceof Error ? err.message : String(err) });
+}
+
+export function isResizeAvailable(): boolean {
+  return sharp !== undefined;
+}
 
 const IMG_CACHE_TTL_MS = Number(process.env.IMG_CACHE_MS ?? 5 * 60 * 1000);
 const MAX_BYTES = Number(process.env.IMG_MAX_BYTES ?? 10 * 1024 * 1024);
@@ -14,6 +30,23 @@ const IMG_CACHE_MAX_BYTES = Number(process.env.IMG_CACHE_MAX_BYTES ?? 50 * 1024 
 const ALLOWED_IMAGE_CT = new Set([
   "image/jpeg", "image/png", "image/webp", "image/gif", "image/avif",
 ]);
+
+const ALLOWED_WIDTHS = new Set(
+  (process.env.IMG_RESIZE_WIDTHS ?? "200,400")
+    .split(",")
+    .map(value => Number(value.trim()))
+    .filter(width => Number.isInteger(width) && width > 0)
+);
+
+// Limits decoded pixel count separately from MAX_BYTES, guarding against decompression
+// bombs from small files. 20MP covers real covers while staying below sharp default limit.
+const MAX_RESIZE_INPUT_PIXELS = 20_000_000;
+
+export function parseAllowedWidth(raw: unknown): number | undefined {
+  if (!sharp || typeof raw !== "string") return undefined;
+  const width = Number(raw);
+  return ALLOWED_WIDTHS.has(width) ? width : undefined;
+}
 
 function safeContentType(raw: string): string {
   const base = raw.split(";")[0].trim().toLowerCase();
@@ -34,7 +67,7 @@ function isValidImageBytes(bytes: Buffer): boolean {
   return false;
 }
 
-type CachedImage = { bytes: Buffer; contentType: string };
+export type CachedImage = { bytes: Buffer; contentType: string };
 
 const BUF_CACHE = new LRUCache<string, CachedImage>({
   maxSize: IMG_CACHE_MAX_BYTES,
@@ -91,6 +124,51 @@ function fetchUpstream(url: string, referer?: string): Promise<{ bytes: Buffer; 
   return req;
 }
 
+export function cacheKey(url: string, width?: number): string {
+  return width ? `${url}|w=${width}` : url;
+}
+
+const RESIZE_IN_FLIGHT = new Map<string, Promise<CachedImage>>();
+
+export async function resizeImage(img: CachedImage, width: number): Promise<CachedImage> {
+  if (!sharp || img.contentType === "image/gif") return img;
+  try {
+    const bytes = await sharp(img.bytes, { limitInputPixels: MAX_RESIZE_INPUT_PIXELS })
+      .resize({ width, withoutEnlargement: true })
+      .toBuffer();
+    return { bytes, contentType: img.contentType };
+  } catch (err) {
+    LOGGER.debug("img_resize_failed", { width, error: err instanceof Error ? err.message : String(err) });
+    return img;
+  }
+}
+
+async function getResized(key: string, original: CachedImage, width: number): Promise<CachedImage> {
+  const cached = BUF_CACHE.get(key);
+  if (cached) return cached;
+
+  const inFlight = RESIZE_IN_FLIGHT.get(key);
+  if (inFlight) return inFlight;
+
+  const job = resizeImage(original, width)
+    .then(result => {
+      if (result !== original) BUF_CACHE.set(key, result);
+      return result;
+    })
+    .finally(() => RESIZE_IN_FLIGHT.delete(key));
+
+  RESIZE_IN_FLIGHT.set(key, job);
+  return job;
+}
+
+function sendImage(res: Response, img: CachedImage) {
+  res.set("Content-Type", img.contentType);
+  res.set("Cache-Control", "public, max-age=86400");
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("Content-Security-Policy", "default-src 'none'");
+  res.send(img.bytes);
+}
+
 export async function imgHandler(req: Request, res: Response) {
   const url = req.query.url as string;
   const rawRef = req.query.ref as string | undefined;
@@ -115,25 +193,37 @@ export async function imgHandler(req: Request, res: Response) {
     try { referer = new URL(url).origin + "/"; } catch {}
   }
 
-  const hit = BUF_CACHE.get(url);
-  if (hit) {
-    res.set("Content-Type", hit.contentType);
-    res.set("Cache-Control", "public, max-age=86400");
-    res.set("X-Content-Type-Options", "nosniff");
-    res.set("Content-Security-Policy", "default-src 'none'");
-    return res.send(hit.bytes);
+  const width = parseAllowedWidth(req.query.w);
+
+  if (width === undefined) {
+    const hit = BUF_CACHE.get(url);
+    if (hit) return sendImage(res, hit);
+
+    try {
+      const original = await fetchUpstream(url, referer);
+      if (original.bytes.length < MAX_BYTES) {
+        BUF_CACHE.set(url, original);
+      }
+      sendImage(res, original);
+    } catch {
+      res.status(404).send();
+    }
+    return;
   }
 
+  const key = cacheKey(url, width);
+  const resizedHit = BUF_CACHE.get(key);
+  if (resizedHit) return sendImage(res, resizedHit);
+
   try {
-    const { bytes, contentType } = await fetchUpstream(url, referer);
-    if (bytes.length < MAX_BYTES) {
-      BUF_CACHE.set(url, { bytes, contentType });
+    let original = BUF_CACHE.get(url);
+    if (!original) {
+      original = await fetchUpstream(url, referer);
+      if (original.bytes.length < MAX_BYTES) {
+        BUF_CACHE.set(url, original);
+      }
     }
-    res.set("Content-Type", contentType);
-    res.set("Cache-Control", "public, max-age=86400");
-    res.set("X-Content-Type-Options", "nosniff");
-    res.set("Content-Security-Policy", "default-src 'none'");
-    res.send(bytes);
+    sendImage(res, await getResized(key, original, width));
   } catch {
     res.status(404).send();
   }

@@ -5,7 +5,9 @@ import type { SearchResult } from "../../../../shared/types.js";
 import { useSourcesStore } from "../../store/sources.js";
 import { decodeHtml } from "../../lib/htmlUtils.js";
 import { formatDate } from "../../lib/dateUtils.js";
+import { resizeImageUrl } from "../../lib/imageUrl.js";
 import { API } from "../../lib/api.js";
+import { useInView } from "../../hooks/useInView.js";
 import MicroLabel from "./MicroLabel.js";
 
 type Props = { item: SearchResult };
@@ -16,13 +18,14 @@ export default function Card({ item }: Props) {
   const sourceColor = source?.color;
   const sourceLang  = source?.language ?? "id";
 
+  const [ref, inView] = useInView<HTMLAnchorElement>();
   const [isImageFailed, setIsImageFailed] = useState(false);
   const [extra, setExtra] = useState<Pick<SearchResult, "cover" | "latestChapter" | "seriesUpdatedAt"> | null>(null);
   const isComplete = Boolean(item.cover && item.latestChapter != null && item.seriesUpdatedAt);
   const [isEnriching, setIsEnriching] = useState(!isComplete);
 
   useEffect(() => {
-    if (isComplete) { setIsEnriching(false); return; }
+    if (isComplete || !inView) return;
     let cancelled = false;
     setIsEnriching(true);
     API.titleInfo(item.sourceId, item.id)
@@ -39,7 +42,7 @@ export default function Card({ item }: Props) {
       .catch(() => {})
       .finally(() => { if (!cancelled) setIsEnriching(false); });
     return () => { cancelled = true; };
-  }, [item.sourceId, item.id, item.cover, item.latestChapter, item.seriesUpdatedAt, isComplete]);
+  }, [item.sourceId, item.id, item.cover, item.latestChapter, item.seriesUpdatedAt, isComplete, inView]);
 
   const cover           = extra?.cover ?? item.cover;
   const latestChapter   = extra?.latestChapter ?? item.latestChapter;
@@ -49,6 +52,7 @@ export default function Card({ item }: Props) {
 
   return (
     <Link
+      ref={ref}
       to={`/detail/${item.sourceId}/${encodeURIComponent(item.id)}`}
       state={{ ...item, _back: location.pathname + location.search }}
       className="group block"
@@ -59,7 +63,7 @@ export default function Card({ item }: Props) {
           <div className="relative aspect-[3/4] bg-panel">
             {cover && !isImageFailed ? (
               <img
-                src={cover}
+                src={resizeImageUrl(cover, 200)}
                 alt={item.title}
                 loading="lazy"
                 decoding="async"

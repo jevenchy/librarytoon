@@ -4,6 +4,25 @@ All notable changes to Librarytoon will be documented in this file.
 
 ---
 
+## [1.3.0] - 2026-06-10
+
+### Added
+
+- Images: `/api/img?w=200|400` resizes covers via `sharp`, with graceful degradation if `sharp` is unavailable (`IMG_RESIZE_WIDTHS` env var, `imgResizeAvailable` in `/api/health`)
+
+### Changed
+
+- Home/Search/Bookmarks: cover images now request a resized variant and use `loading="lazy" decoding="async"`, reducing browser memory usage on cover grids
+- Bookmarks: card metadata enrichment now waits until a card scrolls near the viewport instead of firing for every card on mount
+- Sources: one additional source now proxies covers through `/api/img`
+- Detail: cover for one adapter config no longer gets replaced by a generated social-card image once metadata loads
+
+### Fixed
+
+- Search: listing fallback title extraction now prefers the link title over cover image alt text, fixing malformed titles derived from alt text
+
+---
+
 ## [1.2.0] - 2026-06-10
 
 ### Added

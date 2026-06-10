@@ -6,6 +6,7 @@ import { listAdapters, listAdapterInstances } from "../adapters/index.js";
 import { CACHE } from "../services/cacheService.js";
 import { getConcurrencyStats } from "../services/fetchService.js";
 import { getDohFailures } from "../services/dohService.js";
+import { isResizeAvailable } from "./imgController.js";
 
 const MAX_SOURCES_PER_REQUEST = Number(process.env.MAX_SEARCH_SOURCES ?? 10);
 const MAX_RESULTS_PER_SOURCE  = Number(process.env.MAX_RESULTS_PER_SOURCE ?? 100);
@@ -83,6 +84,7 @@ export function healthHandler(_req: Request, res: Response) {
     adaptersLoaded: adapters.length,
     adaptersEnabled: adapters.filter(adapter => adapter.enabled).length,
     dohFailures: getDohFailures(),
+    imgResizeAvailable: isResizeAvailable(),
   });
 }
 

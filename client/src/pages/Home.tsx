@@ -9,6 +9,7 @@ import Pagination from "../components/ui/Pagination.js";
 import SkeletonCard from "../components/ui/SkeletonCard.js";
 import { API } from "../lib/api.js";
 import { decodeHtml } from "../lib/htmlUtils.js";
+import { resizeImageUrl } from "../lib/imageUrl.js";
 import { readBookmarks, writeBookmarks } from "../lib/bookmarkUtils.js";
 import { useSourcesStore } from "../store/sources.js";
 import { useUiStore } from "../store/ui.js";
@@ -61,7 +62,17 @@ function ThumbCover({ cover }: { cover?: string }) {
       </div>
     );
   }
-  return <img src={cover} alt="" onError={() => setIsFailed(true)} className="w-full h-full object-cover" draggable={false} />;
+  return (
+    <img
+      src={resizeImageUrl(cover, 200)}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onError={() => setIsFailed(true)}
+      className="w-full h-full object-cover"
+      draggable={false}
+    />
+  );
 }
 
 function FeaturedCarousel({ items }: { items: SearchResult[] }) {
@@ -168,7 +179,14 @@ function FeaturedCarousel({ items }: { items: SearchResult[] }) {
       <div className="relative overflow-hidden rounded-card-inner border-2 border-dashed border-edge-bright">
         <div aria-hidden className="absolute inset-0">
           {cover && !isImageFailed && (
-            <img src={cover} alt="" className="w-full h-full object-cover opacity-25 blur-sm" draggable={false} />
+            <img
+              src={resizeImageUrl(cover, 400)}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover opacity-25 blur-sm"
+              draggable={false}
+            />
           )}
           <div
             className="absolute inset-0 sm:hidden"
@@ -225,8 +243,10 @@ function FeaturedCarousel({ items }: { items: SearchResult[] }) {
           <Link to={detailPath} state={active} className="self-center shrink-0 select-none">
             {cover && !isImageFailed ? (
               <img
-                src={cover}
+                src={resizeImageUrl(cover, 400)}
                 alt={active.title}
+                loading="lazy"
+                decoding="async"
                 onError={() => setIsImageFailed(true)}
                 className="w-40 sm:w-52 aspect-[3/4] object-cover rounded-card-inner border-2 border-dashed border-edge-bright shadow-lg"
                 draggable={false}
